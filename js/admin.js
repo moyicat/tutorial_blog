@@ -149,6 +149,7 @@ $(function() {
 
 			start: function(){
 				Parse.history.start({pushState: true});
+				nav("admin");
 			},
 
 			routes: {
@@ -158,7 +159,7 @@ $(function() {
 			},
 
 			admin: function() {
-				console.log('test');
+
 				var currentUser = Parse.User.current();
 				if (currentUser) {
 				    var loginView = new LoginView();
@@ -182,6 +183,7 @@ $(function() {
 						}
 					});
 				}
+				
 			}
 		}),
 
@@ -193,9 +195,5 @@ $(function() {
 		};
 
 	BlogApp.start();
-
-	$(document).on("click", ".admin", function (e) {
-		nav("admin", e);
-	});
 
 });
