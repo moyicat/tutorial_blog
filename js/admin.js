@@ -80,10 +80,8 @@ $(function() {
 					username = data[0].value,
 					password = data[1].value;
 
-				console.log(data);
 				Parse.User.logIn(username, password, {
 					success: function(user) {
-						debugger;
 						nav("admin");
 					},
 					error: function(user, error) {
@@ -108,9 +106,7 @@ $(function() {
 			},
 
 			add: function() {
-				var addBlogView = new AddBlogView();
-				addBlogView.render();
-				$container.html(addBlogView.el);
+				nav('add', e);
 			},
 
 			render: function(){
@@ -151,12 +147,12 @@ $(function() {
 
 			start: function(){
 				Parse.history.start({pushState: true});
-				console.log('test');
 				nav("admin");
 			},
 
 			routes: {
 				"admin": "admin",
+				"login": "login",
 				"add": "add",
 				"edit/:url": "edit"
 			},
@@ -164,11 +160,11 @@ $(function() {
 			admin: function() {
 
 				var currentUser = Parse.User.current();
-				if (currentUser) {
-				    var loginView = new LoginView();
-					loginView.render();
-					$container.html(loginView.el);
+
+				if ( !currentUser ) {
+				   nav('login');
 				} else {
+					console.log(currentUser);
 				    var welcomeView = new WelcomeView({ model: currentUser });
 					welcomeView.render();
 					$container.html(welcomeView.el);
@@ -187,6 +183,18 @@ $(function() {
 					});
 				}
 
+			},
+
+			login: function() {
+				var loginView = new LoginView();
+				loginView.render();
+				$container.html(loginView.el);
+			},
+
+			add: function () {
+				var addBlogView = new AddBlogView();
+				addBlogView.render();
+				$container.html(addBlogView.el);
 			}
 		}),
 
