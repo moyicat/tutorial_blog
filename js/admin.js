@@ -30,6 +30,41 @@ $(function() {
 
 		}),
 
+		Blogs = Parse.Collection.extend({
+			model: Blog
+		}),
+
+		BlogAdminView = Parse.View.extend({
+
+			tagName: 'tr',
+
+			template: _.template($('#blog-admin-tpl').html()),
+
+			render: function(){
+				var attributes = this.model.toJSON();
+				this.$el.html(this.template(attributes));		
+			}
+
+		}),
+
+		BlogsAdminView = Parse.View.extend({
+			
+			tagName: 'table',
+
+			className: 'table',
+
+			renderOne: function(blog){
+				var blogAdminView = new BlogAdminView({ model: blog });
+				blogAdminView.render();
+				this.$el.append(blogAdminView.el);
+			},
+
+			render: function(){ 
+				this.collection.forEach(this.renderOne, this);
+			},
+
+		}),
+
 		LoginView = Parse.View.extend({
 
 			template: _.template($('#login-tpl').html()),
@@ -47,9 +82,7 @@ $(function() {
 
 				Parse.User.logIn(username, password, {
 					success: function(user) {
-						var welcomeView = new WelcomeView({ model: user });
-						welcomeView.render();
-						$container.html(welcomeView.el);
+						nav("admin");
 					},
 					error: function(user, error) {
 						console.log(error);
@@ -106,10 +139,63 @@ $(function() {
 				this.$el.html(this.template());
 			}
 
-		});
+		}),
 
-	var loginView = new LoginView();
-	loginView.render();
-	$container.html(loginView.el);
+		BlogRouter = Parse.Router.extend({
+
+			initialize: function(options){
+				this.blogs = new Blogs();
+			},
+
+			start: function(){
+				Parse.history.start({pushState: true});
+			},
+
+			routes: {
+				"admin": "admin",
+				"add": "add",
+				"edit/:url": "edit"
+			},
+
+			admin: function() {
+				console.log('test');
+				var currentUser = Parse.User.current();
+				if (currentUser) {
+				    var loginView = new LoginView();
+					loginView.render();
+					$container.html(loginView.el);
+				} else {
+				    var welcomeView = new WelcomeView({ model: currentUser });
+					welcomeView.render();
+					$container.html(welcomeView.el);
+
+					var blogs = new Blogs();
+
+					blogs.fetch({
+						success: function(blogs) {
+							var blogsAdminView = new BlogsAdminView({ collection: blogs });
+							blogsAdminView.render();
+							$container.append(blogsAdminView.el);
+						},
+						error: function(blogs, error) {
+							console.log(error);
+						}
+					});
+				}
+			}
+		}),
+
+		BlogApp = new BlogRouter(),
+
+		nav = function (target, e) {
+			BlogApp.navigate(target, { trigger: true });
+			if (e) { e.preventDefault(); }
+		};
+
+	BlogApp.start();
+
+	$(document).on("click", ".admin", function (e) {
+		nav("admin", e);
+	});
 
 });
