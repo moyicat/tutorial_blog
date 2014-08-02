@@ -149,6 +149,7 @@ $(function() {
 
 			start: function(){
 				Parse.history.start({pushState: true});
+				console.log('test');
 				nav("admin");
 			},
 
@@ -183,7 +184,7 @@ $(function() {
 						}
 					});
 				}
-				
+
 			}
 		}),
 
