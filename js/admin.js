@@ -82,6 +82,7 @@ $(function() {
 
 				Parse.User.logIn(username, password, {
 					success: function(user) {
+						debugger;
 						nav("admin");
 					},
 					error: function(user, error) {
