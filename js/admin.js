@@ -80,6 +80,7 @@ $(function() {
 					username = data[0].value,
 					password = data[1].value;
 
+				console.log(data);
 				Parse.User.logIn(username, password, {
 					success: function(user) {
 						debugger;
