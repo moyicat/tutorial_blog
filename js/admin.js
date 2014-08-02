@@ -26,6 +26,21 @@ $(function() {
 						console.log(error);
 					}
 				});
+			},
+
+			update: function(title, content) {
+				this.set({
+					'title': title,
+					'content': content
+				}).save(null, {
+					success: function(blog) {
+						alert('You edited the blog: ' + blog.get('title'));
+					},
+					error: function(blog, error) {
+						console.log(blog);
+						console.log(error);
+					}
+				});
 			}
 
 		}),
@@ -52,6 +67,16 @@ $(function() {
 			tagName: 'table',
 
 			className: 'table',
+
+			events: {
+				'click .edit': 'edit'
+			},
+
+			edit: function(e) {
+				e.preventDefault();
+				var href = $(e.target).attr('href');
+				BlogApp.navigate(href, { trigger: true });
+			},
 
 			renderOne: function(blog){
 				var blogAdminView = new BlogAdminView({ model: blog });
@@ -139,6 +164,29 @@ $(function() {
 
 		}),
 
+		EditBlogView = Parse.View.extend({
+
+			template: _.template($('#edit-tpl').html()),
+
+			events: {
+				'submit .form-edit': 'submit'
+			},
+
+			submit: function(e) {
+				e.preventDefault();
+
+				var data = $(e.target).serializeArray();
+
+				this.model.update(data[0].value, data[1].value);
+			},
+
+			render: function(){
+				var attributes = this.model.toJSON();
+				this.$el.html(this.template(attributes));
+			}
+
+		}),
+
 		BlogRouter = Parse.Router.extend({
 
 			initialize: function(options){
@@ -168,9 +216,7 @@ $(function() {
 					welcomeView.render();
 					$container.html(welcomeView.el);
 
-					var blogs = new Blogs();
-
-					blogs.fetch({
+					this.blogs.fetch({
 						success: function(blogs) {
 							var blogsAdminView = new BlogsAdminView({ collection: blogs });
 							blogsAdminView.render();
@@ -194,6 +240,15 @@ $(function() {
 				var addBlogView = new AddBlogView();
 				addBlogView.render();
 				$container.html(addBlogView.el);
+			},
+
+			edit: function (url) {
+				var blog = this.blogs.filter( function(blog) {
+					return blog.id == url;
+				})[0];
+				var editBlogView = new EditBlogView({ model: blog });
+				editBlogView.render();
+				$container.html(editBlogView.el);
 			}
 		}),
 
