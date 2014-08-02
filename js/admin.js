@@ -8,7 +8,27 @@ $(function() {
 
 	var $container = $('.main-container'),
 
-		Blog = Parse.Object.extend('Blog'),
+		Blog = Parse.Object.extend('Blog', {
+
+			create: function(title, content) {
+				this.set({
+					'title': title,
+					'content': content,
+					'author': Parse.User.current(),
+					'authorName': Parse.User.current().get('username'),
+					'time': new Date().toDateString()
+				}).save(null, {
+					success: function(blog) {
+						alert('You added a new blog: ' + blog.get('title'));
+					},
+					error: function(blog, error) {
+						console.log(blog);
+						console.log(error);
+					}
+				});
+			}
+
+		}),
 
 		LoginView = Parse.View.extend({
 
@@ -79,18 +99,7 @@ $(function() {
 				var data = $(e.target).serializeArray(),
 					blog = new Blog();
 
-				blog.set('title', data[0].value)
-					.set('content', data[1].value)
-					.set('author', Parse.User.current())
-					.save(null, {
-						success: function(blog) {
-							alert('You added a new blog: ' + blog.get('title'));
-						},
-						error: function(blog, error) {
-							console.log(blog);
-							console.log(error);
-						}
-					});
+				blog.create(data[0].value, data[1].value);
 			},
 
 			render: function(){
