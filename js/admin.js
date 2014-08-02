@@ -82,7 +82,7 @@ $(function() {
 
 				Parse.User.logIn(username, password, {
 					success: function(user) {
-						nav("admin");
+						BlogApp.navigate('admin', { trigger: true });
 					},
 					error: function(user, error) {
 						console.log(error);
@@ -106,7 +106,7 @@ $(function() {
 			},
 
 			add: function() {
-				nav('add', e);
+				BlogApp.navigate('add', { trigger: true });
 			},
 
 			render: function(){
@@ -147,14 +147,14 @@ $(function() {
 
 			start: function(){
 				Parse.history.start({pushState: true});
-				nav("admin");
+				BlogApp.navigate('admin', { trigger: true });
 			},
 
 			routes: {
-				"admin": "admin",
-				"login": "login",
-				"add": "add",
-				"edit/:url": "edit"
+				'admin': 'admin',
+				'login': 'login',
+				'add': 'add',
+				'edit/:url': 'edit'
 			},
 
 			admin: function() {
@@ -162,9 +162,8 @@ $(function() {
 				var currentUser = Parse.User.current();
 
 				if ( !currentUser ) {
-				   nav('login');
+				   BlogApp.navigate('login', { trigger: true });
 				} else {
-					console.log(currentUser);
 				    var welcomeView = new WelcomeView({ model: currentUser });
 					welcomeView.render();
 					$container.html(welcomeView.el);
@@ -198,12 +197,7 @@ $(function() {
 			}
 		}),
 
-		BlogApp = new BlogRouter(),
-
-		nav = function (target, e) {
-			BlogApp.navigate(target, { trigger: true });
-			if (e) { e.preventDefault(); }
-		};
+		BlogApp = new BlogRouter();
 
 	BlogApp.start();
 
