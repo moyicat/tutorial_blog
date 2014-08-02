@@ -3,21 +3,18 @@ $(function() {
 	Parse.$ = jQuery;
 
 	Parse.initialize(
-		"MuLlfET9KdSdwJ70aol03zHmu5bNTGprdu5jZpec", 
-		"NslqpkwkAsRP3gxw5pSlf8gw9PJhKqNW6UbikTK3");
+		'MuLlfET9KdSdwJ70aol03zHmu5bNTGprdu5jZpec', 
+		'NslqpkwkAsRP3gxw5pSlf8gw9PJhKqNW6UbikTK3');
 
-	var $container = $('.blogs-container'),
+	var $container = $('.main-container'),
 
-		Blog = Parse.Object.extend("Blog"),
+		Blog = Parse.Object.extend('Blog'),
 
 		BlogView = Parse.View.extend({
 
 			className: 'blog-post',
 
-			template: _.template(''
-				+ '<h2 class="blog-post-title"><%= title %></h2>'
-	            + '<p class="blog-post-meta"><%= createdAt %> by <a href="#"><%= author %></a></p>'
-	            + '<div><%= content %></div>'),
+			template: _.template($('#blog-tpl').html()),
 
 			render: function(){
 				var attributes = this.model.toJSON();

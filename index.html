@@ -38,13 +38,8 @@
 
         <div class="col-sm-8 blog-main">
           
-          <div class="blogs-container"></div>
+          <div class="main-container"></div>
              
-          <ul class="pager">
-            <li><a href="#">Previous</a></li>
-            <li><a href="#">Next</a></li>
-          </ul>
-
         </div><!-- /.blog-main -->
 
         <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
@@ -89,6 +84,14 @@
         <a href="#">Back to top</a>
       </p>
     </div>
+
+    <!-- Templates -->
+
+    <script type="text/template" id="blog-tpl">
+      <h2 class="blog-post-title"><%= title %></h2>
+      <p class="blog-post-meta"><%= createdAt %> by <a href="#"><%= author %></a></p>
+      <div><%= content %></div>
+    </script>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
