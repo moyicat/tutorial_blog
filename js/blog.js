@@ -31,7 +31,7 @@ $(function() {
 					'time': this.get('time') || new Date().toDateString()
 				}).save(null, {
 					success: function(blog) {
-						BlogApp.navigate('admin', { trigger: true });
+						BlogApp.navigate('tutorial_blog/admin', { trigger: true });
 					},
 					error: function(blog, error) {
 						console.log(error);
@@ -118,7 +118,7 @@ $(function() {
 
 				Parse.User.logIn(username, password, {
 					success: function(user) {
-						BlogApp.navigate('admin', { trigger: true });
+						BlogApp.navigate('tutorial_blog/admin', { trigger: true });
 					},
 					error: function(user, error) {
 						console.log(error);
@@ -185,17 +185,17 @@ $(function() {
 
 			start: function(){
 				Parse.history.start({pushState: true});
-				BlogApp.navigate('', { trigger: true });
+				BlogApp.navigate('tutorial_blog/', { trigger: true });
 			},
 
 			routes: {
-				'': 'index',
-				'admin': 'admin',
-				'login': 'login',
-				'logout': 'logout',
-				'add': 'add',
-				'edit/:url': 'edit',
-				'del/:del': 'del'
+				'tutorial_blog/': 'index',
+				'tutorial_blog/admin': 'admin',
+				'tutorial_blog/login': 'login',
+				'tutorial_blog/logout': 'logout',
+				'tutorial_blog/add': 'add',
+				'tutorial_blog/edit/:url': 'edit',
+				'tutorial_blog/del/:del': 'del'
 			},
 
 			index: function() {
@@ -216,7 +216,7 @@ $(function() {
 				var currentUser = Parse.User.current();
 
 				if ( !currentUser ) {
-				   BlogApp.navigate('login', { trigger: true });
+				   BlogApp.navigate('tutorial_blog/login', { trigger: true });
 				} else {
 				    var welcomeView = new WelcomeView({ model: currentUser });
 					welcomeView.render();
@@ -245,12 +245,12 @@ $(function() {
 
 			logout: function () {
 				Parse.User.logOut();
-				BlogApp.navigate('login', { trigger: true });
+				BlogApp.navigate('tutorial_blog/login', { trigger: true });
 			},
 
 			add: function () {
 				if (!Parse.User.current()) {
-					BlogApp.navigate('login', { trigger: true });
+					BlogApp.navigate('tutorial_blog/login', { trigger: true });
 				} else {
 					var writeBlogView = new WriteBlogView();
 					writeBlogView.render();
@@ -260,7 +260,7 @@ $(function() {
 
 			edit: function (url) {
 				if (!Parse.User.current()) {
-					BlogApp.navigate('login', { trigger: true });
+					BlogApp.navigate('tutorial_blog/login', { trigger: true });
 				} else {
 					var blog = this.blogs.filter( function(blog) {
 						return blog.get('url') == url;
@@ -273,14 +273,14 @@ $(function() {
 
 			del: function (url) {
 				if (!Parse.User.current()) {
-					BlogApp.navigate('login', { trigger: true });
+					BlogApp.navigate('tutorial_blog/login', { trigger: true });
 				} else {
 					var blog = this.blogs.filter( function(blog) {
 						return blog.get('url') == url;
 					})[0];
 					blog.destroy({
 						success: function(blog) {
-							BlogApp.navigate('admin', { trigger: true });
+							BlogApp.navigate('tutorial_blog/admin', { trigger: true });
 						},
 						error: function(blog, error) {
 							console.log(error);
@@ -294,7 +294,7 @@ $(function() {
 
 		nav = function (e) {
 			e.preventDefault();
-			var href = $(e.target).attr('href');
+			var href = 'tutorial_blog/' + $(e.target).attr('href');
 			BlogApp.navigate(href, { trigger: true });
 		};
 
