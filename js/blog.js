@@ -10,31 +10,23 @@ $(function() {
 
 		Blog = Parse.Object.extend('Blog', {
 
-			create: function(title, content) {
+			update: function(title, content) {
+
+				if ( !this.get('ACL') ) {
+					var blogACL = new Parse.ACL(Parse.User.current());
+					blogACL.setPublicReadAccess(true);
+					this.setACL(blogACL);
+				}
+
 				this.set({
 					'title': title,
 					'content': content,
-					'author': Parse.User.current(),
-					'authorName': Parse.User.current().get('username'),
-					'time': new Date().toDateString()
+					'author': this.get('author') || Parse.User.current(),
+					'authorName': this.get('authorName') || Parse.User.current().get('username'),
+					'time': this.get('time') || new Date().toDateString()
 				}).save(null, {
 					success: function(blog) {
-						alert('You added a new blog: ' + blog.get('title'));
-					},
-					error: function(blog, error) {
-						console.log(blog);
-						console.log(error);
-					}
-				});
-			},
-
-			update: function(title, content) {
-				this.set({
-					'title': title,
-					'content': content
-				}).save(null, {
-					success: function(blog) {
-						alert('You edited the blog: ' + blog.get('title'));
+						BlogApp.navigate('admin', { trigger: true });
 					},
 					error: function(blog, error) {
 						console.log(blog);
@@ -166,47 +158,34 @@ $(function() {
 
 		}),
 
-		AddBlogView = Parse.View.extend({
+		WriteBlogView = Parse.View.extend({
 
-			template: _.template($('#add-tpl').html()),
-
-			events: {
-				'submit .form-add': 'submit'
-			},
-
-			submit: function(e) {
-				e.preventDefault();
-
-				var data = $(e.target).serializeArray(),
-					blog = new Blog();
-
-				blog.create(data[0].value, data[1].value);
-			},
-
-			render: function(){
-				this.$el.html(this.template());
-			}
-
-		}),
-
-		EditBlogView = Parse.View.extend({
-
-			template: _.template($('#edit-tpl').html()),
+			template: _.template($('#write-tpl').html()),
 
 			events: {
-				'submit .form-edit': 'submit'
+				'submit .form-write': 'submit'
 			},
 
 			submit: function(e) {
 				e.preventDefault();
 
 				var data = $(e.target).serializeArray();
-
+				this.model = this.model || new Blog();
 				this.model.update(data[0].value, data[1].value);
 			},
 
 			render: function(){
-				var attributes = this.model.toJSON();
+				var attributes;
+				if (this.model) {
+					attributes = this.model.toJSON();
+					attributes.form_title = 'Edit Blog';	
+				} else {
+					attributes = {
+						form_title: 'Add a Blog',
+						title: '',
+						content: ''
+					}
+				}
 				this.$el.html(this.template(attributes));
 			}
 
@@ -276,18 +255,18 @@ $(function() {
 			},
 
 			add: function () {
-				var addBlogView = new AddBlogView();
-				addBlogView.render();
-				$container.html(addBlogView.el);
+				var writeBlogView = new WriteBlogView();
+				writeBlogView.render();
+				$container.html(writeBlogView.el);
 			},
 
 			edit: function (url) {
 				var blog = this.blogs.filter( function(blog) {
 					return blog.id == url;
 				})[0];
-				var editBlogView = new EditBlogView({ model: blog });
-				editBlogView.render();
-				$container.html(editBlogView.el);
+				var writeBlogView = new WriteBlogView({ model: blog });
+				writeBlogView.render();
+				$container.html(writeBlogView.el);
 			}
 		}),
 
