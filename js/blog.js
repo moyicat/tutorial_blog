@@ -34,7 +34,6 @@ $(function() {
 						BlogApp.navigate('admin', { trigger: true });
 					},
 					error: function(blog, error) {
-						console.log(blog);
 						console.log(error);
 					}
 				});
@@ -194,7 +193,8 @@ $(function() {
 				'admin': 'admin',
 				'login': 'login',
 				'add': 'add',
-				'edit/:url': 'edit'
+				'edit/:url': 'edit',
+				'del/:del': 'del'
 			},
 
 			index: function() {
@@ -262,6 +262,24 @@ $(function() {
 					var writeBlogView = new WriteBlogView({ model: blog });
 					writeBlogView.render();
 					$container.html(writeBlogView.el);
+				}
+			},
+
+			del: function (url) {
+				if (!Parse.User.current()) {
+					BlogApp.navigate('login', { trigger: true });
+				} else {
+					var blog = this.blogs.filter( function(blog) {
+						return blog.get('url') == url;
+					})[0];
+					blog.destroy({
+						success: function(blog) {
+							BlogApp.navigate('admin', { trigger: true });
+						},
+						error: function(blog, error) {
+							console.log(error);
+						}
+					});
 				}
 			}
 		}),
