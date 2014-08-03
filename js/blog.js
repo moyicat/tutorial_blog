@@ -20,6 +20,9 @@ $(function() {
 
 				this.set({
 					'title': title,
+					'url': title.toLowerCase()
+								.replace(/[^\w ]+/g,'')
+								.replace(/ +/g,'-'),
 					'content': content,
 					'author': this.get('author') || Parse.User.current(),
 					'authorName': this.get('authorName') || Parse.User.current().get('username'),
@@ -269,7 +272,7 @@ $(function() {
 					BlogApp.navigate('login', { trigger: true });
 				} else {
 					var blog = this.blogs.filter( function(blog) {
-						return blog.id == url;
+						return blog.get('url') == url;
 					})[0];
 					var writeBlogView = new WriteBlogView({ model: blog });
 					writeBlogView.render();

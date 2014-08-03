@@ -92,11 +92,11 @@
     </script>
 
     <script type="text/template" id="blog-admin-tpl">
-      <td><a href="#"><%= title %></a></td>
+      <td><a class="edit" href="edit/<%= url %>"><%= title %></a></td>
       <td><%= authorName %></td>
       <td><%= time %></td>
       <td>
-        <a class="edit" href="edit/<%= objectId %>">Edit</a> | <a href="#">Delete</a>
+        <a class="edit" href="edit/<%= url %>">Edit</a> | <a href="#">Delete</a>
       </td>
     </script>
 
