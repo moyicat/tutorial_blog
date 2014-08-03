@@ -6,7 +6,9 @@ $(function() {
 		'MuLlfET9KdSdwJ70aol03zHmu5bNTGprdu5jZpec', 
 		'NslqpkwkAsRP3gxw5pSlf8gw9PJhKqNW6UbikTK3');
 
-	var $container = $('.main-container'),
+	var $doc = $(document),
+
+		$container = $('.main-container'),
 
 		Blog = Parse.Object.extend('Blog', {
 
@@ -88,14 +90,6 @@ $(function() {
 			
 			tagName: 'tbody',
 
-			events: {
-				'click .edit': 'edit'
-			},
-
-			edit: function(e) {
-				nav(e);
-			},
-
 			renderOne: function(blog){
 				var blogAdminView = new BlogAdminView({ model: blog });
 				blogAdminView.render();
@@ -143,14 +137,6 @@ $(function() {
 		WelcomeView = Parse.View.extend({
 
 			template: _.template($('#welcome-tpl').html()),
-
-			events: {
-				'click .add-blog':'add'
-			},
-
-			add: function() {
-				BlogApp.navigate('add', { trigger: true });
-			},
 
 			render: function(){
 				var attributes = this.model.toJSON();
@@ -290,7 +276,10 @@ $(function() {
 
 	BlogApp.start();
 
-	$(document).on('click', '.blog-nav-item', function(e) {
+	$doc.on('click', '.app-link', function(e) {
+			nav(e);
+		})
+		.on('click', '.blog-nav-item', function(e) {
 		nav(e);
 		$(this).addClass('active').siblings().removeClass('active');
 	});
