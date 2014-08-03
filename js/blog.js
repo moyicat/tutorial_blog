@@ -86,9 +86,7 @@ $(function() {
 
 		BlogsAdminView = Parse.View.extend({
 			
-			tagName: 'table',
-
-			className: 'table',
+			tagName: 'tbody',
 
 			events: {
 				'click .edit': 'edit'
@@ -239,9 +237,10 @@ $(function() {
 
 					this.blogs.fetch({
 						success: function(blogs) {
-							var blogsAdminView = new BlogsAdminView({ collection: blogs });
+							var blogsAdminView = new BlogsAdminView({ collection: blogs }),
+								$table = $('.blog-admin-list');
 							blogsAdminView.render();
-							$container.append(blogsAdminView.el);
+							$table.append(blogsAdminView.el);
 						},
 						error: function(blogs, error) {
 							console.log(error);
