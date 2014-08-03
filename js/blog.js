@@ -192,6 +192,7 @@ $(function() {
 				'': 'index',
 				'admin': 'admin',
 				'login': 'login',
+				'logout': 'logout',
 				'add': 'add',
 				'edit/:url': 'edit',
 				'del/:del': 'del'
@@ -240,6 +241,11 @@ $(function() {
 				var loginView = new LoginView();
 				loginView.render();
 				$container.html(loginView.el);
+			},
+
+			logout: function () {
+				Parse.User.logOut();
+				BlogApp.navigate('login', { trigger: true });
 			},
 
 			add: function () {
@@ -298,8 +304,8 @@ $(function() {
 			nav(e);
 		})
 		.on('click', '.blog-nav-item', function(e) {
-		nav(e);
-		$(this).addClass('active').siblings().removeClass('active');
+			nav(e);
+			$(this).addClass('active').siblings().removeClass('active');
 	});
 
 });
