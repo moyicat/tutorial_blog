@@ -255,18 +255,26 @@ $(function() {
 			},
 
 			add: function () {
-				var writeBlogView = new WriteBlogView();
-				writeBlogView.render();
-				$container.html(writeBlogView.el);
+				if (!Parse.User.current()) {
+					BlogApp.navigate('login', { trigger: true });
+				} else {
+					var writeBlogView = new WriteBlogView();
+					writeBlogView.render();
+					$container.html(writeBlogView.el);
+				}
 			},
 
 			edit: function (url) {
-				var blog = this.blogs.filter( function(blog) {
-					return blog.id == url;
-				})[0];
-				var writeBlogView = new WriteBlogView({ model: blog });
-				writeBlogView.render();
-				$container.html(writeBlogView.el);
+				if (!Parse.User.current()) {
+					BlogApp.navigate('login', { trigger: true });
+				} else {
+					var blog = this.blogs.filter( function(blog) {
+						return blog.id == url;
+					})[0];
+					var writeBlogView = new WriteBlogView({ model: blog });
+					writeBlogView.render();
+					$container.html(writeBlogView.el);
+				}
 			}
 		}),
 
