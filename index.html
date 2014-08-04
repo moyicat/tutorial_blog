@@ -23,7 +23,7 @@
       <div class="container">
         <nav class="blog-nav">
           <a class="blog-nav-item active" href="">Home</a>
-          <a class="blog-nav-item" href="admin">Admin</a>
+          <a class="blog-nav-item" href="#/admin">Admin</a>
         </nav>
       </div>
     </div>
@@ -92,12 +92,12 @@
     </script>
 
     <script type="text/template" id="blog-admin-tpl">
-      <td><a class="app-link" href="edit/<%= url %>"><%= title %></a></td>
+      <td><a class="app-link" href="#/edit/<%= url %>"><%= title %></a></td>
       <td><%= authorName %></td>
       <td><%= time %></td>
       <td>
-        <a class="app-link" href="edit/<%= url %>">Edit</a> | 
-        <a class="app-link" href="del/<%= url %>">Delete</a>
+        <a class="app-link" href="#/edit/<%= url %>">Edit</a> | 
+        <a class="app-link" href="#/del/<%= url %>">Delete</a>
       </td>
     </script>
 
@@ -122,12 +122,12 @@
           </tr>
         </thead>
       </table>
-      <a class="btn btn-lg btn-primary app-link" href="add">Add a New Blog</a>
-      <a class="btn btn-lg btn-default app-link" href="logout">Logout</a>
+      <a class="btn btn-lg btn-primary app-link" href="#/add">Add a New Blog</a>
+      <a class="btn btn-lg btn-default app-link" href="#/logout">Logout</a>
     </script>
   
     <script type="text/template" id="write-tpl">
-      <a href="admin" class="app-link">&laquo; Back</a>
+      <a href="#/admin" class="app-link">&laquo; Back</a>
 
       <h2><%= form_title %></h2>
 
