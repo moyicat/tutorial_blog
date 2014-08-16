@@ -245,6 +245,7 @@ $(function() {
 				}
 			}
 			this.$el.html(this.template(attributes));
+			this.$el.find('textarea').wysihtml5();
 		}
 
 	});
