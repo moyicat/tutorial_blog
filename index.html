@@ -47,6 +47,10 @@
             <p>Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>
           </div>
           <div class="sidebar-module">
+            <h4>Categories</h4>
+            <div class="categories"></div>
+          </div>
+           <div class="sidebar-module">
             <h4>Archives</h4>
             <div class="archives"></div>
           </div>
@@ -72,6 +76,10 @@
     </div>
 
     <!-- Templates -->
+
+    <script type="text/template" id="category-tpl">
+      <a href="#/category/<%= url %>"><%= name %></a>
+    </script>
 
     <script type="text/template" id="archive-tpl">
       <a href="#/archive/<%= year %>/<%= month %>"><%= monthString %> <%= year %></a>
