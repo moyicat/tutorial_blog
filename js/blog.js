@@ -38,7 +38,7 @@ $(function() {
 
 	BlogApp.Models.Blog = Parse.Object.extend('Blog', {
 
-		update: function(title, content) {
+		update: function(form) {
 
 			if ( !this.get('ACL') ) {
 				var blogACL = new Parse.ACL(Parse.User.current());
@@ -46,14 +46,18 @@ $(function() {
 				this.setACL(blogACL);
 			}
 
-			var d = new Date();
+			var d = new Date(),
+				category = BlogApp.categories.filter( function(category) {
+					return category.id == form.category;
+				})[0];
 
 			this.set({
-				'title': title,
-				'url': title.toLowerCase()
+				'title': form.title,
+				'url': form.title.toLowerCase()
 							.replace(/[^\w ]+/g,'')
 							.replace(/ +/g,'-'),
-				'content': content,
+				'category': category,
+				'content': form.content,
 				'author': this.get('author') || Parse.User.current(),
 				'authorName': this.get('authorName') || Parse.User.current().get('username'),
 				'time': this.get('time') || d.toDateString(),
@@ -139,6 +143,36 @@ $(function() {
 		}
 
 	});
+
+
+	BlogApp.Views.CategoriesSelect = Parse.View.extend({
+
+		tagName: 'select',
+
+		className: 'form-control',
+
+		attributes: {
+			'name': 'category'
+		},
+
+		renderOne: function(category) {
+			if ( BlogApp.blog ) {
+				if ( category.id === BlogApp.blog.attributes.category.id ) {
+					this.$el.append('<option value=' + category.id + ' selected>' + category.attributes.name + '</option>');
+				} else {
+					this.$el.append('<option value=' + category.id + '>' + category.attributes.name + '</option>');
+				}
+			} else {
+				this.$el.append('<option value=' + category.id + '>' + category.attributes.name + '</option>');
+			}		
+		},
+
+		render: function() {
+			this.collection.forEach(this.renderOne, this);
+		}
+
+	});
+
 
 	BlogApp.Views.Archive = Parse.View.extend({
 
@@ -266,12 +300,18 @@ $(function() {
 			e.preventDefault();
 
 			var data = $(e.target).serializeArray();
+			console.log(data);
 			this.model = this.model || new BlogApp.Models.Blog();
-			this.model.update(data[0].value, data[1].value);
+			this.model.update({
+				title: data[0].value, 
+				category: data[1].value,
+				content: data[2].value
+			});
 		},
 
 		render: function(){
-			var attributes;
+			var self = this,
+				attributes;
 			if (this.model) {
 				attributes = this.model.toJSON();
 				attributes.form_title = 'Edit Blog';	
@@ -282,8 +322,14 @@ $(function() {
 					content: ''
 				}
 			}
-			this.$el.html(this.template(attributes));
-			this.$el.find('textarea').wysihtml5();
+			BlogApp.fn.getCollection(BlogApp.categories, function(categories){
+				var categoriesSelect = new BlogApp.Views.CategoriesSelect({ collection: categories });
+				categoriesSelect.render();
+				attributes.categoriesSelect = categoriesSelect.el.outerHTML;
+				self.$el.html(self.template(attributes));
+				self.$el.find('textarea').wysihtml5();
+			});
+			
 		}
 
 	});
@@ -291,8 +337,8 @@ $(function() {
 	BlogApp.Router = Parse.Router.extend({
 
 		initialize: function(options){
-			this.blogs = new BlogApp.Collections.Blogs();
-			this.categories = new BlogApp.Collections.Categories();
+			BlogApp.blogs = new BlogApp.Collections.Blogs();
+			BlogApp.categories = new BlogApp.Collections.Categories();
 		},
 
 		start: function(){
@@ -312,20 +358,14 @@ $(function() {
 		},
 
 		index: function() {
-			this.blogs.fetch({
-				success: function(blogs) {
-
-					var blogsView = new BlogApp.Views.Blogs({ collection: blogs });
-					blogsView.render();
-					BlogApp.$container.html(blogsView.el);
-					
-					var archivesView = new BlogApp.Views.Archives({ collection: blogs });
-					archivesView.render();
-					BlogApp.$archives.html(archivesView.el);
-				},
-				error: function(blogs, error) {
-					console.log(error);
-				}
+			BlogApp.fn.getCollection(BlogApp.blogs, function(blogs){
+				var blogsView = new BlogApp.Views.Blogs({ collection: blogs });
+				blogsView.render();
+				BlogApp.$container.html(blogsView.el);
+				
+				var archivesView = new BlogApp.Views.Archives({ collection: blogs });
+				archivesView.render();
+				BlogApp.$archives.html(archivesView.el);
 			});
 			this.loadSidebar();
 		},
@@ -363,10 +403,9 @@ $(function() {
 				}
 			});
 
-			if (!this.blogs.length) {
-				this.blogs.fetch({
+			if (!BlogApp.blogs.length) {
+				BlogApp.blogs.fetch({
 					success: function(blogs) {
-						
 						var archivesView = new BlogApp.Views.Archives({ collection: blogs });
 						archivesView.render();
 						BlogApp.$archives.html(archivesView.el);
@@ -376,32 +415,6 @@ $(function() {
 					}
 				});
 			}
-		},
-
-		admin: function() {
-
-			var currentUser = Parse.User.current();
-
-			if ( !currentUser ) {
-			   Parse.history.navigate('#/login', { trigger: true });
-			} else {
-				var welcomeView = new BlogApp.Views.Welcome({ model: currentUser });
-				welcomeView.render();
-				BlogApp.$container.html(welcomeView.el);
-
-				this.blogs.fetch({
-					success: function(blogs) {
-						var blogsAdminView = new BlogApp.Views.BlogsAdmin({ collection: blogs }),
-							$table = $('.blog-admin-list');
-						blogsAdminView.render();
-						$table.append(blogsAdminView.el);
-					},
-					error: function(blogs, error) {
-						console.log(error);
-					}
-				});
-			}
-
 		},
 
 		login: function() {
@@ -415,57 +428,60 @@ $(function() {
 			Parse.history.navigate('#/login', { trigger: true });
 		},
 
+		admin: function() {
+
+			var currentUser = BlogApp.fn.checkLogin();
+
+			var welcomeView = new BlogApp.Views.Welcome({ model: currentUser });
+			welcomeView.render();
+			BlogApp.$container.html(welcomeView.el);
+
+			BlogApp.fn.getCollection(BlogApp.blogs, function(blogs){
+				var blogsAdminView = new BlogApp.Views.BlogsAdmin({ collection: blogs }),
+					$table = $('.blog-admin-list');
+				blogsAdminView.render();
+				$table.append(blogsAdminView.el);
+			});
+
+		},
+
 		add: function () {
-			if (!Parse.User.current()) {
-				Parse.history.navigate('#/login', { trigger: true });
-			} else {
-				var writeBlogView = new BlogApp.Views.WriteBlog();
-				writeBlogView.render();
-				BlogApp.$container.html(writeBlogView.el);
-			}
+			BlogApp.fn.checkLogin();
+			var writeBlogView = new BlogApp.Views.WriteBlog();
+			writeBlogView.render();
+			BlogApp.$container.html(writeBlogView.el);
 		},
 
 		edit: function (url) {
-			if (!Parse.User.current()) {
-				Parse.history.navigate('#/login', { trigger: true });
-			} else {
-				var blog = this.blogs.filter( function(blog) {
-					return blog.get('url') == url;
-				})[0];
-				var writeBlogView = new BlogApp.Views.WriteBlog({ model: blog });
-				writeBlogView.render();
-				BlogApp.$container.html(writeBlogView.el);
-			}
+			BlogApp.fn.checkLogin();
+			BlogApp.blog = BlogApp.blogs.filter( function(blog) {
+				return blog.get('url') == url;
+			})[0];
+			var writeBlogView = new BlogApp.Views.WriteBlog({ model: BlogApp.blog });
+			writeBlogView.render();
+			BlogApp.$container.html(writeBlogView.el);
 		},
 
 		del: function (url) {
-			if (!Parse.User.current()) {
-				Parse.history.navigate('#/login', { trigger: true });
-			} else {
-				var blog = this.blogs.filter( function(blog) {
-					return blog.get('url') == url;
-				})[0];
-				blog.destroy({
-					success: function(blog) {
-						Parse.history.navigate('#/admin', { trigger: true });
-					},
-					error: function(blog, error) {
-						console.log(error);
-					}
-				});
-			}
+			BlogApp.fn.checkLogin();
+			var blog = BlogApp.blogs.filter( function(blog) {
+				return blog.get('url') == url;
+			})[0];
+			blog.destroy({
+				success: function(blog) {
+					Parse.history.navigate('#/admin', { trigger: true });
+				},
+				error: function(blog, error) {
+					console.log(error);
+				}
+			});
 		},
 
 		loadSidebar: function() {
-			this.categories.fetch({
-				success: function(categories) {
-					var categoriesView = new BlogApp.Views.Categories({ collection: categories });
+			BlogApp.fn.getCollection(BlogApp.categories, function(categories){
+				var categoriesView = new BlogApp.Views.Categories({ collection: categories });
 					categoriesView.render();
 					BlogApp.$categories.html(categoriesView.el);
-				},
-				error: function(categories, error) {
-					console.log(error);
-				}
 			});
 		}
 
@@ -485,6 +501,31 @@ $(function() {
 				'November',
 				'December'][n];
 	};
+
+	BlogApp.fn.getCollection = function(collection, callback) {
+		if (collection.length) {
+			callback(collection);
+		} else {
+			collection.fetch({
+				success: function (collection) {
+					callback(collection);
+				},
+				error: function(collection, error) {
+					console.log(error);
+					return;
+				}
+			})
+		}
+	}
+
+	BlogApp.fn.checkLogin = function() {
+		var currentUser = Parse.User.current();
+		if (!currentUser) {
+			Parse.history.navigate('#/login', { trigger: true });
+		} else {
+			return currentUser;
+		}
+	}
 
 	BlogApp.start();
 
