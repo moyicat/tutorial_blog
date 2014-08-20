@@ -42,26 +42,10 @@
         </div><!-- /.blog-main -->
 
         <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
-          <div class="sidebar-module sidebar-module-inset">
+          <!-- <div class="sidebar-module sidebar-module-inset">
             <h4>About</h4>
             <p>Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>
-          </div>
-          <div class="sidebar-module">
-            <h4>Categories</h4>
-            <div class="categories"></div>
-          </div>
-           <div class="sidebar-module">
-            <h4>Archives</h4>
-            <div class="archives"></div>
-          </div>
-          <div class="sidebar-module">
-            <h4>Elsewhere</h4>
-            <ol class="list-unstyled">
-              <li><a href="#">GitHub</a></li>
-              <li><a href="#">Twitter</a></li>
-              <li><a href="#">Facebook</a></li>
-            </ol>
-          </div>
+          </div> -->
         </div><!-- /.blog-sidebar -->
 
       </div><!-- /.row -->
@@ -77,31 +61,70 @@
 
     <!-- Templates -->
 
-    <script type="text/template" id="category-tpl">
-      <a href="#/category/<%= url %>"><%= name %></a>
+    <script id="blogs-tpl" type="text/x-handlebars-template">
+      {{#each blog}}
+      <div class="blog-post">
+        <h2 class="blog-post-title">{{title}}</h2>
+        <p class="blog-post-meta">{{time}} by <a href="#">{{authorName}}</a></p>
+        <div>{{{content}}}</div>
+      </div>
+      {{/each}}
     </script>
 
-    <script type="text/template" id="archive-tpl">
-      <a href="#/archive/<%= year %>/<%= month %>"><%= monthString %> <%= year %></a>
+    <script id="nav-categories-tpl" type="text/x-handlebars-template">
+      <h4>Categories</h4>
+      <ol class="list-unstyled">
+        {{#each category}}
+        <li>
+          <a href="#/category/{{url}}">{{name}}</a>
+        </li>
+        {{/each}}
+      </ol>
     </script>
 
-    <script type="text/template" id="blog-tpl">
-      <h2 class="blog-post-title"><%= title %></h2>
-      <p class="blog-post-meta"><%= time %> by <a href="#"><%= authorName %></a></p>
-      <div><%= content %></div>
+    <script id="nav-archives-tpl" type="text/x-handlebars-template">
+      <h4>Archives</h4>
+      <ol class="list-unstyled">
+        {{#each archive}}
+        <li>
+          <a href="#/archive/{{year}}/{{month}}">{{monthString}} {{year}}</a>
+        </li>
+        {{/each}}
+      </ol>
     </script>
 
-    <script type="text/template" id="blog-admin-tpl">
-      <td><a class="app-link" href="#/edit/<%= url %>"><%= title %></a></td>
-      <td><%= authorName %></td>
-      <td><%= time %></td>
-      <td>
-        <a class="app-link" href="#/edit/<%= url %>">Edit</a> | 
-        <a class="app-link" href="#/del/<%= url %>">Delete</a>
-      </td>
+    <script id="blogs-admin-tpl" type="text/x-handlebars-template">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Time</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each blog}}
+        <tr>
+          <td><a class="app-link" href="#/edit/{{url}}">{{title}}</a></td>
+          <td>{{authorName}}</td>
+          <td>{{time}}</td>
+          <td>
+            <a class="app-link" href="#/edit/{{url}}">Edit</a> | 
+            <a class="app-link" href="#/del/{{url}}">Delete</a>
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
     </script>
 
-    <script type="text/template" id="login-tpl">
+    <script id="welcome-tpl" type="text/x-handlebars-template">
+      <h2>Welcome, {{username}}</h2>
+      {{{blogs}}}
+      <a class="btn btn-lg btn-primary app-link" href="#/add">Add a New Blog</a>
+      <a class="btn btn-lg btn-default app-link" href="#/logout">Logout</a>
+    </script>
+
+    <script id="login-tpl" type="text/x-handlebars-template">
       <form class="form-signin" role="form">
         <h2 class="form-signin-heading">Please sign in</h2>
         <input type="text" name="username" class="form-control" placeholder="Username" required="" autofocus="">
@@ -109,51 +132,41 @@
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
       </form>
     </script>
-
-    <script type="text/template" id="welcome-tpl">
-      <h2>Welcome, <%=username %>!</h2>
-      <table class="table blog-admin-list">
-          <thead>
-          <tr>
-            <td>Blog</td>
-            <td>Author</td>
-            <td>Created at</td>
-            <td>Actions</td>
-          </tr>
-        </thead>
-      </table>
-      <a class="btn btn-lg btn-primary app-link" href="#/add">Add a New Blog</a>
-      <a class="btn btn-lg btn-default app-link" href="#/logout">Logout</a>
-    </script>
   
-    <script type="text/template" id="write-tpl">
+    <script id="write-tpl" type="text/x-handlebars-template">
       <a href="#/admin" class="app-link">&laquo; Back</a>
 
-      <h2><%= form_title %></h2>
+      <h2>{{form_title}}</h2>
 
       <form class="form-write" role="form">
         <div class="form-group">
           <label for="title">Title</label>
-          <input name="title" type="text" class="form-control" id="title" value="<%= title %>"></input>
+          <input name="title" type="text" class="form-control" id="title" value="{{title}}"></input>
         </div>
         <div class="form-group">
           <label for="category">Category</label>
-          <%= categoriesSelect %>
+          {{{categoriesSelect}}}
         </div>
         <div class="form-group">
           <label for="content">Content</label>
-          <textarea name="content" class="form-control" rows="20"><%= content %></textarea>
+          <textarea name="content" class="form-control" rows="20">{{content}}</textarea>
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
       </form>
+    </script>
+
+    <script id="select-categories-tpl" type="text/x-handlebars-template">
+      {{#each category}}
+      <option value="{{objectId}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+      {{/each}}
     </script>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="https://www.parsecdn.com/js/parse-1.2.19.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
     <script src="js/bootstrap.min.js"></script>
+    <script src="js/handlebars-v1.3.0.js"></script>
     <script src="js/wysihtml5-0.3.0.min.js"></script>
     <script src="js/bootstrap3-wysihtml5.js"></script>
     <script src="js/blog.js"></script>

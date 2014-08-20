@@ -28,8 +28,7 @@ $(function() {
 
 		start: function() {
 			this.$container = this.$el.find('.main-container');
-			this.$categories = this.$el.find('.categories');
-			this.$archives = this.$el.find('.archives');
+			this.$sidebar = this.$el.find('.blog-sidebar');
 			var router = new this.Router;
 			router.start();
 		}
@@ -86,64 +85,58 @@ $(function() {
 		model: BlogApp.Models.Category
 	});
 
-	BlogApp.Views.Blog = Parse.View.extend({
-
-		className: 'blog-post',
-
-		template: _.template($('#blog-tpl').html()),
-
-		render: function(){
-			var attributes = this.model.toJSON();
-			this.$el.html(this.template(attributes));		
-		}
-
-	});
-
 	BlogApp.Views.Blogs = Parse.View.extend({
+
+		className: 'blog-posts',
+
+		template: Handlebars.compile($('#blogs-tpl').html()),
 		
-		renderOne: function(blog){
-			var blogView = new BlogApp.Views.Blog({ model: blog });
-			blogView.render();
-			this.$el.append(blogView.el);
-		},
-
 		render: function(){ 
-			this.collection.forEach(this.renderOne, this);
+			var collection = { blog: this.collection.toJSON() };
+			this.$el.html(this.template(collection));
+			
 		},
-
-	});
-
-	BlogApp.Views.Category = Parse.View.extend({
-
-		tagName: 'li',
-
-		template: _.template($('#category-tpl').html()),
-
-		render: function() {
-			var attributes = this.model.toJSON();
-			this.$el.html(this.template(attributes));		
-		}
 
 	});
 
 	BlogApp.Views.Categories = Parse.View.extend({
 
-		tagName: 'ol',
+		className: 'sidebar-module',
 
-		className: 'list-unstyled',
-
-		renderOne: function(category) {
-			var categoryView = new BlogApp.Views.Category({ model: category });
-			categoryView.render();
-			this.$el.append(categoryView.el);
-		},
+		template: Handlebars.compile($('#nav-categories-tpl').html()),
 
 		render: function() {
-			this.collection.forEach(this.renderOne, this);
+			var collection = { category: this.collection.toJSON() };
+			this.$el.html(this.template(collection));
 		}
 
 	});
 
+	BlogApp.Views.Archives = Parse.View.extend({
+
+		className: 'sidebar-module',
+
+		template: Handlebars.compile($('#nav-archives-tpl').html()),
+
+		render: function() {
+			var archMo,
+				archYr,
+				collection = { archive: [] };
+			this.collection.forEach(function(blog){
+				if ( blog.get('month') === archMo && blog.get('year') === archYr ) {
+					return;
+				} else {
+					var json = blog.toJSON();
+					json.monthString = BlogApp.fn.toMonthString(json.month);
+					collection.archive.push(json);
+					archMo = blog.get('month');
+					archYr = blog.get('year');
+				}
+			});
+			this.$el.html(this.template(collection));
+		}
+
+	});
 
 	BlogApp.Views.CategoriesSelect = Parse.View.extend({
 
@@ -155,99 +148,40 @@ $(function() {
 			'name': 'category'
 		},
 
-		renderOne: function(category) {
-			if ( BlogApp.blog ) {
-				if ( category.id === BlogApp.blog.attributes.category.id ) {
-					this.$el.append('<option value=' + category.id + ' selected>' + category.attributes.name + '</option>');
+		template: Handlebars.compile($('#select-categories-tpl').html()),
+
+		render: function() {
+			var collection = { category: this.collection.toJSON() };
+			collection.category.forEach(function(c){
+				if ( BlogApp.blog && c.objectId === BlogApp.blog.attributes.category.id ) {
+					c.selected = true;
 				} else {
-					this.$el.append('<option value=' + category.id + '>' + category.attributes.name + '</option>');
-				}
-			} else {
-				this.$el.append('<option value=' + category.id + '>' + category.attributes.name + '</option>');
-			}		
-		},
-
-		render: function() {
-			this.collection.forEach(this.renderOne, this);
-		}
-
-	});
-
-
-	BlogApp.Views.Archive = Parse.View.extend({
-
-		tagName: 'li',
-
-		template: _.template($('#archive-tpl').html()),
-
-		render: function() {
-			var attributes = this.model.toJSON();
-			attributes.monthString = BlogApp.fn.toMonthString(attributes.month);
-			this.$el.html(this.template(attributes));		
-		}
-
-	});
-
-	BlogApp.Views.Archives = Parse.View.extend({
-
-		tagName: 'ol',
-
-		className: 'list-unstyled',
-
-		renderOne: function(blog) {
-			var archiveView = new BlogApp.Views.Archive({ model: blog });
-			archiveView.render();
-			this.$el.append(archiveView.el);
-		},
-
-		render: function() {
-			var archMo,
-				archYr; 
-			this.collection.forEach(function(blog){
-				if ( blog.get('month') === archMo && blog.get('year') === archYr ) {
 					return;
-				} else {
-					this.renderOne(blog);
-					archMo = blog.get('month');
-					archYr = blog.get('year');
 				}
-			}, this);
-		}
-
-	});
-
-	BlogApp.Views.BlogAdmin = Parse.View.extend({
-
-		tagName: 'tr',
-
-		template: _.template($('#blog-admin-tpl').html()),
-
-		render: function(){
-			var attributes = this.model.toJSON();
-			this.$el.html(this.template(attributes));		
+			});
+			this.$el.html(this.template(collection));
 		}
 
 	});
 
 	BlogApp.Views.BlogsAdmin = Parse.View.extend({
-		
-		tagName: 'tbody',
 
-		renderOne: function(blog){
-			var blogAdminView = new BlogApp.Views.BlogAdmin({ model: blog });
-			blogAdminView.render();
-			this.$el.append(blogAdminView.el);
-		},
+		tagName: 'table',
 
-		render: function(){ 
-			this.collection.forEach(this.renderOne, this);
-		},
+		className: 'table',
+
+		template: Handlebars.compile($('#blogs-admin-tpl').html()),
+
+		render: function() {
+			var collection = { blog: this.collection.toJSON() };
+			this.$el.html(this.template(collection));
+		}
 
 	});
 
 	BlogApp.Views.Login = Parse.View.extend({
 
-		template: _.template($('#login-tpl').html()),
+		template: Handlebars.compile($('#login-tpl').html()),
 
 		events: {
 			'submit .form-signin': 'login'
@@ -279,18 +213,24 @@ $(function() {
 
 	BlogApp.Views.Welcome = Parse.View.extend({
 
-		template: _.template($('#welcome-tpl').html()),
+		template: Handlebars.compile($('#welcome-tpl').html()),
 
 		render: function(){
-			var attributes = this.model.toJSON();
-			this.$el.html(this.template(attributes));
+			var self = this,
+				attributes = this.model.toJSON();
+			BlogApp.fn.getCollection(BlogApp.blogs, function(blogs){
+				var blogsAdminView = new BlogApp.Views.BlogsAdmin({ collection: blogs });
+				blogsAdminView.render();
+				attributes.blogs = blogsAdminView.el.outerHTML;
+				self.$el.html(self.template(attributes));
+			});
 		}
 
 	});
 
 	BlogApp.Views.WriteBlog = Parse.View.extend({
 
-		template: _.template($('#write-tpl').html()),
+		template: Handlebars.compile($('#write-tpl').html()),
 
 		events: {
 			'submit .form-write': 'submit'
@@ -300,7 +240,6 @@ $(function() {
 			e.preventDefault();
 
 			var data = $(e.target).serializeArray();
-			console.log(data);
 			this.model = this.model || new BlogApp.Models.Blog();
 			this.model.update({
 				title: data[0].value, 
@@ -362,10 +301,6 @@ $(function() {
 				var blogsView = new BlogApp.Views.Blogs({ collection: blogs });
 				blogsView.render();
 				BlogApp.$container.html(blogsView.el);
-				
-				var archivesView = new BlogApp.Views.Archives({ collection: blogs });
-				archivesView.render();
-				BlogApp.$archives.html(archivesView.el);
 			});
 			this.loadSidebar();
 		},
@@ -375,16 +310,17 @@ $(function() {
 				query = new Parse.Query(BlogApp.Models.Blog);
 			innerQuery.equalTo('url', url);
 			query.matchesQuery('category', innerQuery);
-			query.find({
+			var blogs = query.collection();
+			blogs.fetch({
 				success: function(blogs) {
 					var blogsView = new BlogApp.Views.Blogs({ collection: blogs });
 					blogsView.render();
 					BlogApp.$container.html(blogsView.el);
-			 	},
-			 	error: function(blogs, error) {
-			 		console.log(error);
-			 	}
-			});
+				}, 
+				error: function(blogs, error) {
+					console.log(error);
+				}
+			})
 			this.loadSidebar();
 		},
 
@@ -392,29 +328,18 @@ $(function() {
 			var query = new Parse.Query(BlogApp.Models.Blog);
 			query.equalTo('year', parseInt(year, 10));
 			query.equalTo('month', parseInt(month, 10));
-			query.find({
+			var blogs = query.collection();
+			blogs.fetch({
 				success: function(blogs) {
 					var blogsView = new BlogApp.Views.Blogs({ collection: blogs });
 					blogsView.render();
 					BlogApp.$container.html(blogsView.el);
-				},
-				error: function(error) {
+				}, 
+				error: function(blogs, error) {
 					console.log(error);
 				}
-			});
-
-			if (!BlogApp.blogs.length) {
-				BlogApp.blogs.fetch({
-					success: function(blogs) {
-						var archivesView = new BlogApp.Views.Archives({ collection: blogs });
-						archivesView.render();
-						BlogApp.$archives.html(archivesView.el);
-					},
-					error: function(blogs, error) {
-						console.log(error);
-					}
-				});
-			}
+			})
+			this.loadSidebar();
 		},
 
 		login: function() {
@@ -435,13 +360,6 @@ $(function() {
 			var welcomeView = new BlogApp.Views.Welcome({ model: currentUser });
 			welcomeView.render();
 			BlogApp.$container.html(welcomeView.el);
-
-			BlogApp.fn.getCollection(BlogApp.blogs, function(blogs){
-				var blogsAdminView = new BlogApp.Views.BlogsAdmin({ collection: blogs }),
-					$table = $('.blog-admin-list');
-				blogsAdminView.render();
-				$table.append(blogsAdminView.el);
-			});
 
 		},
 
@@ -478,10 +396,16 @@ $(function() {
 		},
 
 		loadSidebar: function() {
+			BlogApp.$sidebar.empty();
 			BlogApp.fn.getCollection(BlogApp.categories, function(categories){
 				var categoriesView = new BlogApp.Views.Categories({ collection: categories });
 					categoriesView.render();
-					BlogApp.$categories.html(categoriesView.el);
+					BlogApp.$sidebar.append(categoriesView.el);
+			});
+			BlogApp.fn.getCollection(BlogApp.blogs, function(blogs){
+				var archivesView = new BlogApp.Views.Archives({ collection: blogs });
+				archivesView.render();
+				BlogApp.$sidebar.append(archivesView.el);
 			});
 		}
 
