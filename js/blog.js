@@ -61,9 +61,7 @@ $(function() {
 				'content': form.content,
 				'author': this.get('author') || Parse.User.current(),
 				'authorName': this.get('authorName') || Parse.User.current().get('username'),
-				'time': this.get('time') || d.toDateString(),
-				'month': this.get('month') || d.getMonth(),
-				'year': this.get('year') || d.getFullYear()
+				'time': this.get('time') || d.toDateString()
 			}).save(null, {
 				success: function(blog) {
 					Parse.history.navigate('#/admin', { trigger: true });
@@ -453,21 +451,6 @@ $(function() {
 		}
 
 	});
-
-	BlogApp.fn.toMonthString = function(n) {
-		return ['January',
-				'February',
-				'March',
-				'April',
-				'May',
-				'June',
-				'July',
-				'August',
-				'September',
-				'October',
-				'November',
-				'December'][n];
-	};
 
 	BlogApp.fn.getCollection = function(collection, callback) {
 		if (collection.length) {
