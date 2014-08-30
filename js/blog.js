@@ -399,23 +399,6 @@ $(function() {
 			})
 		},
 
-		archive: function(year, month) {
-			var query = new Parse.Query(BlogApp.Models.Blog);
-			query.equalTo('year', parseInt(year, 10));
-			query.equalTo('month', parseInt(month, 10));
-			var blogs = query.collection();
-			blogs.fetch({
-				success: function(blogs) {
-					var blogsView = new BlogApp.Views.Blogs({ collection: blogs });
-					blogsView.render();
-					BlogApp.$container.html(blogsView.el);
-				}, 
-				error: function(blogs, error) {
-					console.log(error);
-				}
-			})
-		},
-
 		login: function() {
 			var loginView = new BlogApp.Views.Login();
 			loginView.render();
@@ -474,11 +457,6 @@ $(function() {
 				var categoriesView = new BlogApp.Views.Categories({ collection: categories });
 					categoriesView.render();
 					BlogApp.$sidebar.append(categoriesView.el);
-			});
-			BlogApp.fn.getCollection(BlogApp.blogs, function(blogs){
-				var archivesView = new BlogApp.Views.Archives({ collection: blogs });
-				archivesView.render();
-				BlogApp.$sidebar.append(archivesView.el);
 			});
 		}
 
