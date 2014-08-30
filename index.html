@@ -42,12 +42,12 @@
 			</div><!-- /.blog-main -->
 
 			<div class="col-sm-3 col-sm-offset-1 blog-sidebar">
-				<!--
+
 				<div class="sidebar-module sidebar-module-inset">
-		            <h4>About</h4>
-		            <p>Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>
-	        	</div>
-	        	-->
+					<!-- <h4>About</h4>
+					<p>Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p> -->
+				</div>
+
 			</div><!-- /.blog-sidebar -->
 
 		</div><!-- /.row -->
@@ -55,7 +55,7 @@
 	</div><!-- /.container -->
 
 	<div class="blog-footer">
-		<p>Blog template built for <a href="http://getbootstrap.com">Bootstrap</a> by <a href="https://twitter.com/mdo">@mdo</a>.</p>
+		<p>Blog template built for <a href="http://getbootstrap.com" target="_blank">Bootstrap</a> by <a href="https://twitter.com/mdo">@mdo</a>, modified by <a href="https://twitter.com/moyicat" target="_blank">@moyicat</a></p>
 		<p>
 			<a href="#">Back to top</a>
 		</p>
@@ -66,11 +66,50 @@
 	<script id="blogs-tpl" type="text/x-handlebars-template">
 		{{#each blog}}
 		<div class="blog-post">
-			<h2 class="blog-post-title">{{title}}</h2>
+			<h2 class="blog-post-title"><a href="#/blog/{{url}}">{{title}}</a></h2>
 			<p class="blog-post-meta">{{time}} by <a href="#">{{authorName}}</a></p>
 			<div>{{{content}}}</div>
 		</div>
 		{{/each}}
+	</script>
+
+	<script id="blog-tpl" type="text/x-handlebars-template">
+		<div class="blog-post">
+			<h2 class="blog-post-title">{{title}}</h2>
+			<p class="blog-post-meta">{{time}} by <a href="#">{{authorName}}</a></p>
+			<div>{{{content}}}</div>
+		</div>
+
+		<h2>Leave a Comment</h2>
+		<form class="form-comment" role="form">
+			<div class="form-group">
+				<label for="comment-author-name">Name</label>
+				<input name="authorName" type="text" class="form-control" id="comment-author-name" placeholder="Your name">
+			</div>
+			<div class="form-group">
+				<label for="comment-email">Email address</label>
+				<input name="email" type="email" class="form-control" id="comment-email" placeholder="Your email">
+			</div>
+			
+			<div class="form-group">
+				<label for="comment-content">Comment</label>
+				<textarea name="content" class="form-control" rows="3" id="comment-content"></textarea>
+			</div>
+			<button type="submit" class="btn btn-default">Submit</button>
+		</form>
+
+		{{#if comment}}
+		<h2>Comments</h2>
+		<ul class="blog-comments list-unstyled">
+		{{#each comment}}
+			<li class="blog-comment">
+				<div><a href="mailto:{{email}}">{{authorName}}</a> said on {{time}}:</div>
+				<div>{{content}}</div>
+			</li>		
+		{{/each}}
+		</ul>
+		{{/if}}
+
 	</script>
 
 	<script id="nav-categories-tpl" type="text/x-handlebars-template">

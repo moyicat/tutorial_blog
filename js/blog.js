@@ -79,6 +79,31 @@ $(function() {
 		query: (new Parse.Query(BlogApp.Models.Blog)).descending('createdAt')
 	});
 
+	BlogApp.Models.Comment = Parse.Object.extend('Comment', {
+		update: function(form) {
+			var d = new Date();
+
+			this.set({
+				'authorName': form.authorName,
+				'email': form.email,
+				'content': form.content,
+				'blog': BlogApp.blog,
+				'time': d.toDateString()
+			}).save(null, {
+				success: function(comment) {
+					window.location.reload();
+				},
+				error: function(comment, error) {
+					console.log(error);
+				}
+			})
+		}
+	});
+
+	BlogApp.Collections.Comments = Parse.Collection.extend({
+		model: BlogApp.Models.Comment
+	});
+
 	BlogApp.Models.Category = Parse.Object.extend('Category');
 
 	BlogApp.Collections.Categories = Parse.Collection.extend({
@@ -94,7 +119,42 @@ $(function() {
 		render: function(){ 
 			var collection = { blog: this.collection.toJSON() };
 			this.$el.html(this.template(collection));
-			
+		},
+
+	});
+
+	BlogApp.Views.Blog = Parse.View.extend({
+
+		template: Handlebars.compile($('#blog-tpl').html()),
+
+		events: {
+			'submit .form-comment': 'submit'
+		},
+
+		submit: function (e) {
+			e.preventDefault();
+
+			var data = $(e.target).serializeArray();
+			this.comment = new BlogApp.Models.Comment();
+			this.comment.update({
+				authorName: data[0].value, 
+				email: data[1].value,
+				content: data[2].value
+			});
+		},
+
+		render: function (){ 
+			var self = this,
+				attributes = this.model.toJSON(),
+				query = new Parse.Query(BlogApp.Models.Comment);
+			query.equalTo("blog", this.model);
+			var collection = query.collection();
+			collection.fetch({
+				success: function(comments) {
+					attributes.comment = comments.toJSON();
+					self.$el.html(self.template(attributes));		
+				}
+			});
 		},
 
 	});
@@ -286,6 +346,7 @@ $(function() {
 
 		routes: {
 			'': 'index',
+			'blog/:url': 'blog',
 			'category/:url': 'category',
 			'archive/:year/:month': 'archive',
 			'admin': 'admin',
@@ -301,6 +362,21 @@ $(function() {
 				var blogsView = new BlogApp.Views.Blogs({ collection: blogs });
 				blogsView.render();
 				BlogApp.$container.html(blogsView.el);
+			});
+			this.loadSidebar();
+		},
+
+		blog: function (url) {
+			console.log(url);
+			BlogApp.fn.getCollection(BlogApp.blogs, function(blogs){
+
+				BlogApp.blog = BlogApp.blogs.filter(function(blog) {
+					return blog.get('url') == url;
+				})[0];
+				var blogView = new BlogApp.Views.Blog({ model: BlogApp.blog });
+				blogView.render();
+				BlogApp.$container.html(blogView.el);
+
 			});
 			this.loadSidebar();
 		},
