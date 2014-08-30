@@ -30,6 +30,7 @@ $(function() {
 			this.render();
 			this.$container = this.$el.find('.main-container');
 			this.$sidebar = this.$el.find('.blog-sidebar');
+			this.$nav = this.$el.find('.blog-nav-item');
 			var router = new this.Router;
 			router.start();
 			this.fn.getSidebar();
@@ -65,6 +66,7 @@ $(function() {
 			}).save(null, {
 				success: function(blog) {
 					Parse.history.navigate('#/admin', { trigger: true });
+					window.location.reload();
 				},
 				error: function(blog, error) {
 					console.log(error);
@@ -358,6 +360,7 @@ $(function() {
 		},
 
 		index: function() {
+			BlogApp.fn.setPageType('blog');
 			BlogApp.fn.getCollection(BlogApp.blogs, function(blogs){
 				var blogsView = new BlogApp.Views.Blogs({ collection: blogs });
 				blogsView.render();
@@ -366,7 +369,7 @@ $(function() {
 		},
 
 		blog: function (url) {
-
+			BlogApp.fn.setPageType('blog');
 			BlogApp.fn.getCollection(BlogApp.blogs, function(blogs){
 
 				BlogApp.blog = BlogApp.blogs.filter(function(blog) {
@@ -380,6 +383,7 @@ $(function() {
 		},
 
 		category: function(url){
+			BlogApp.fn.setPageType('blog');
 			var innerQuery = new Parse.Query(BlogApp.Models.Category),
 				query = new Parse.Query(BlogApp.Models.Blog);
 			innerQuery.equalTo('url', url);
@@ -398,6 +402,7 @@ $(function() {
 		},
 
 		login: function() {
+			BlogApp.fn.setPageType('login');
 			var loginView = new BlogApp.Views.Login();
 			loginView.render();
 			BlogApp.$container.html(loginView.el);
@@ -409,9 +414,8 @@ $(function() {
 		},
 
 		admin: function() {
-
+			BlogApp.fn.setPageType('admin');
 			var currentUser = BlogApp.fn.checkLogin();
-
 			var welcomeView = new BlogApp.Views.Welcome({ model: currentUser });
 			welcomeView.render();
 			BlogApp.$container.html(welcomeView.el);
@@ -419,14 +423,14 @@ $(function() {
 		},
 
 		add: function () {
-			BlogApp.fn.checkLogin();
+			BlogApp.fn.setPageType('admin');
 			var writeBlogView = new BlogApp.Views.WriteBlog();
 			writeBlogView.render();
 			BlogApp.$container.html(writeBlogView.el);
 		},
 
 		edit: function (url) {
-			BlogApp.fn.checkLogin();
+			BlogApp.fn.setPageType('admin');
 			BlogApp.blog = BlogApp.blogs.filter( function(blog) {
 				return blog.get('url') == url;
 			})[0];
@@ -436,7 +440,7 @@ $(function() {
 		},
 
 		del: function (url) {
-			BlogApp.fn.checkLogin();
+			BlogApp.fn.setPageType('admin');
 			var blog = BlogApp.blogs.filter( function(blog) {
 				return blog.get('url') == url;
 			})[0];
@@ -474,6 +478,19 @@ $(function() {
 			categoriesView.render();
 			BlogApp.$sidebar.append(categoriesView.el);
 		});
+	};
+
+	BlogApp.fn.setPageType = function(type) {
+		if (type === "blog") {
+			BlogApp.$nav.eq(0).addClass('active')
+				   .siblings().removeClass('active');
+		} else {
+			BlogApp.$nav.eq(1).addClass('active')
+				   .siblings().removeClass('active');
+		}
+		if (type === "admin") {
+			BlogApp.fn.checkLogin();
+		}
 	};
 
 	BlogApp.fn.checkLogin = function() {
