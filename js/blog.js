@@ -15,13 +15,7 @@ $(function() {
 		fn: {},
 
 		template: Handlebars.compile($('#master-tpl').html()),
-
-		events: {
-			'click .blog-nav-item': function(e) {
-				$(e.target).addClass('active').siblings().removeClass('active');
-			},
-		},
-
+		
 		render: function() {
 			this.$el.html(this.template());
 		},
