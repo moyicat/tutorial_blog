@@ -280,7 +280,7 @@ $(function() {
 		render: function(){
 			var self = this,
 				attributes = this.model.toJSON();
-			BlogApp.fn.getCollection(BlogApp.blogs, function(blogs){
+			BlogApp.fn.fetchCollection(BlogApp.blogs, function(blogs){
 				var blogsAdminView = new BlogApp.Views.BlogsAdmin({ collection: blogs });
 				blogsAdminView.render();
 				attributes.blogs = blogsAdminView.el.outerHTML;
@@ -323,7 +323,7 @@ $(function() {
 					content: ''
 				}
 			}
-			BlogApp.fn.getCollection(BlogApp.categories, function(categories){
+			BlogApp.fn.fetchCollection(BlogApp.categories, function(categories){
 				var categoriesSelect = new BlogApp.Views.CategoriesSelect({ collection: categories });
 				categoriesSelect.render();
 				attributes.categoriesSelect = categoriesSelect.el.outerHTML;
@@ -361,24 +361,24 @@ $(function() {
 
 		index: function() {
 			BlogApp.fn.setPageType('blog');
-			BlogApp.fn.getCollection(BlogApp.blogs, function(blogs){
-				var blogsView = new BlogApp.Views.Blogs({ collection: blogs });
-				blogsView.render();
-				BlogApp.$container.html(blogsView.el);
+			BlogApp.fn.fetchCollection(BlogApp.blogs, function(blogs) {
+				BlogApp.fn.renderView({
+					View: BlogApp.Views.Blogs,
+					data: { collection: blogs }
+				});
 			});
 		},
 
 		blog: function (url) {
 			BlogApp.fn.setPageType('blog');
-			BlogApp.fn.getCollection(BlogApp.blogs, function(blogs){
-
-				BlogApp.blog = BlogApp.blogs.filter(function(blog) {
-					return blog.get('url') == url;
-				})[0];
-				var blogView = new BlogApp.Views.Blog({ model: BlogApp.blog });
-				blogView.render();
-				BlogApp.$container.html(blogView.el);
-
+			var query = new Parse.Query(BlogApp.Models.Blog);
+			query
+			.equalTo("url", url)
+			.find(function(blog) {
+				BlogApp.fn.renderView({
+					View: BlogApp.Views.Blog,
+					data: { model: blog[0] }
+				});
 			});
 		},
 
@@ -391,9 +391,10 @@ $(function() {
 			var blogs = query.collection();
 			blogs.fetch({
 				success: function(blogs) {
-					var blogsView = new BlogApp.Views.Blogs({ collection: blogs });
-					blogsView.render();
-					BlogApp.$container.html(blogsView.el);
+					BlogApp.fn.renderView({
+						View: BlogApp.Views.Blogs,
+						data: { collection: blogs }
+					});
 				}, 
 				error: function(blogs, error) {
 					console.log(error);
@@ -403,9 +404,9 @@ $(function() {
 
 		login: function() {
 			BlogApp.fn.setPageType('login');
-			var loginView = new BlogApp.Views.Login();
-			loginView.render();
-			BlogApp.$container.html(loginView.el);
+			BlogApp.fn.renderView({
+					View: BlogApp.Views.Login,
+			});
 		},
 
 		logout: function () {
@@ -416,27 +417,30 @@ $(function() {
 		admin: function() {
 			BlogApp.fn.setPageType('admin');
 			var currentUser = BlogApp.fn.checkLogin();
-			var welcomeView = new BlogApp.Views.Welcome({ model: currentUser });
-			welcomeView.render();
-			BlogApp.$container.html(welcomeView.el);
-
+			BlogApp.fn.renderView({
+				View: BlogApp.Views.Welcome,
+				data: { model: currentUser }
+			});
 		},
 
 		add: function () {
 			BlogApp.fn.setPageType('admin');
-			var writeBlogView = new BlogApp.Views.WriteBlog();
-			writeBlogView.render();
-			BlogApp.$container.html(writeBlogView.el);
+			BlogApp.fn.renderView({
+				View: BlogApp.Views.WriteBlog
+			});
 		},
 
 		edit: function (url) {
 			BlogApp.fn.setPageType('admin');
-			BlogApp.blog = BlogApp.blogs.filter( function(blog) {
-				return blog.get('url') == url;
-			})[0];
-			var writeBlogView = new BlogApp.Views.WriteBlog({ model: BlogApp.blog });
-			writeBlogView.render();
-			BlogApp.$container.html(writeBlogView.el);
+			var query = new Parse.Query(BlogApp.Models.Blog);
+			query
+			.equalTo("url", url)
+			.find(function(blog) {
+				BlogApp.fn.renderView({
+					View: BlogApp.Views.WriteBlog,
+					data: { model: blog[0] }
+				});
+			});
 		},
 
 		del: function (url) {
@@ -456,7 +460,7 @@ $(function() {
 
 	});
 
-	BlogApp.fn.getCollection = function(collection, callback) {
+	BlogApp.fn.fetchCollection = function(collection, callback) {
 		if (collection.length) {
 			callback(collection);
 		} else {
@@ -472,11 +476,22 @@ $(function() {
 		}
 	};
 
+	BlogApp.fn.renderView = function(options) {
+		var View = options.View,
+			data = options.data || null,
+			$container = options.$container || BlogApp.$container,
+			view = new View(data);
+		view.render();
+		$container.html(view.el);
+	};
+
 	BlogApp.fn.getSidebar = function() {
-		BlogApp.fn.getCollection(BlogApp.categories, function(categories){
-			var categoriesView = new BlogApp.Views.Categories({ collection: categories });
-			categoriesView.render();
-			BlogApp.$sidebar.append(categoriesView.el);
+		BlogApp.fn.fetchCollection(BlogApp.categories, function(categories){
+			BlogApp.fn.renderView({
+				View: BlogApp.Views.Categories,
+				data: { collection: categories },
+				$container: BlogApp.$sidebar
+			});
 		});
 	};
 
