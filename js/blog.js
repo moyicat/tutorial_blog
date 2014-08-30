@@ -32,6 +32,7 @@ $(function() {
 			this.$sidebar = this.$el.find('.blog-sidebar');
 			var router = new this.Router;
 			router.start();
+			router.loadSidebar();
 		}
 
 	}))({el: document.body});
@@ -335,7 +336,7 @@ $(function() {
 	});
 
 	BlogApp.Router = Parse.Router.extend({
-		
+
 		initialize: function(options){
 			BlogApp.blogs = new BlogApp.Collections.Blogs();
 			BlogApp.categories = new BlogApp.Collections.Categories();
@@ -364,7 +365,6 @@ $(function() {
 				blogsView.render();
 				BlogApp.$container.html(blogsView.el);
 			});
-			this.loadSidebar();
 		},
 
 		blog: function (url) {
@@ -379,7 +379,6 @@ $(function() {
 				BlogApp.$container.html(blogView.el);
 
 			});
-			this.loadSidebar();
 		},
 
 		category: function(url){
@@ -398,7 +397,6 @@ $(function() {
 					console.log(error);
 				}
 			})
-			this.loadSidebar();
 		},
 
 		archive: function(year, month) {
@@ -416,7 +414,6 @@ $(function() {
 					console.log(error);
 				}
 			})
-			this.loadSidebar();
 		},
 
 		login: function() {
@@ -473,7 +470,6 @@ $(function() {
 		},
 
 		loadSidebar: function() {
-			BlogApp.$sidebar.empty();
 			BlogApp.fn.getCollection(BlogApp.categories, function(categories){
 				var categoriesView = new BlogApp.Views.Categories({ collection: categories });
 					categoriesView.render();
