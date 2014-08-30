@@ -32,7 +32,7 @@ $(function() {
 			this.$sidebar = this.$el.find('.blog-sidebar');
 			var router = new this.Router;
 			router.start();
-			router.loadSidebar();
+			this.fn.getSidebar();
 		}
 
 	}))({el: document.body});
@@ -450,14 +450,6 @@ $(function() {
 					console.log(error);
 				}
 			});
-		},
-
-		loadSidebar: function() {
-			BlogApp.fn.getCollection(BlogApp.categories, function(categories){
-				var categoriesView = new BlogApp.Views.Categories({ collection: categories });
-					categoriesView.render();
-					BlogApp.$sidebar.append(categoriesView.el);
-			});
 		}
 
 	});
@@ -491,7 +483,15 @@ $(function() {
 				}
 			})
 		}
-	}
+	};
+
+	BlogApp.fn.getSidebar = function() {
+		BlogApp.fn.getCollection(BlogApp.categories, function(categories){
+			var categoriesView = new BlogApp.Views.Categories({ collection: categories });
+			categoriesView.render();
+			BlogApp.$sidebar.append(categoriesView.el);
+		});
+	};
 
 	BlogApp.fn.checkLogin = function() {
 		var currentUser = Parse.User.current();
@@ -500,7 +500,7 @@ $(function() {
 		} else {
 			return currentUser;
 		}
-	}
+	};
 
 	BlogApp.start();
 
