@@ -14,7 +14,7 @@ $(function() {
 		nodes: {},
 		fn: {},
 
-		// template: _.template($('#master-tpl').html()),
+		template: Handlebars.compile($('#master-tpl').html()),
 
 		events: {
 			'click .blog-nav-item': function(e) {
@@ -22,11 +22,12 @@ $(function() {
 			},
 		},
 
-		// render: function() {
-		// 	this.$el.html(this.template());
-		// },
+		render: function() {
+			this.$el.html(this.template());
+		},
 
 		start: function() {
+			this.render();
 			this.$container = this.$el.find('.main-container');
 			this.$sidebar = this.$el.find('.blog-sidebar');
 			var router = new this.Router;
@@ -334,12 +335,12 @@ $(function() {
 	});
 
 	BlogApp.Router = Parse.Router.extend({
-
+		
 		initialize: function(options){
 			BlogApp.blogs = new BlogApp.Collections.Blogs();
 			BlogApp.categories = new BlogApp.Collections.Categories();
 		},
-
+		
 		start: function(){
 			Parse.history.start({root: '/tutorial_blog/'});
 		},
@@ -367,7 +368,7 @@ $(function() {
 		},
 
 		blog: function (url) {
-			console.log(url);
+
 			BlogApp.fn.getCollection(BlogApp.blogs, function(blogs){
 
 				BlogApp.blog = BlogApp.blogs.filter(function(blog) {
