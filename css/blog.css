@@ -173,3 +173,11 @@ h6, .h6 {
 .clicky-hide {
   display: none;
 }
+
+/*
+ * Add Section Class to Leave Margin
+ */
+
+.blog-sec {
+  margin-bottom: 60px;
+}

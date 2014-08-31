@@ -224,6 +224,8 @@ $(function() {
 
 		template: Handlebars.compile($('#login-tpl').html()),
 
+		className: 'blog-sec',
+
 		events: {
 			'submit .form-signin': 'login'
 		},
@@ -257,6 +259,8 @@ $(function() {
 
 		template: Handlebars.compile($('#welcome-tpl').html()),
 
+		className: 'blog-sec',
+
 		render: function(){
 			var self = this,
 				attributes = this.model.toJSON();
@@ -276,6 +280,8 @@ $(function() {
 	BlogApp.Views.WriteBlog = Parse.View.extend({
 
 		template: Handlebars.compile($('#write-tpl').html()),
+
+		className: 'blog-sec',
 
 		events: {
 			'submit .form-write': 'submit'
@@ -365,8 +371,8 @@ $(function() {
 					View: BlogApp.Views.Blog,
 					data: { model: blog[0] }
 				});
+				BlogApp.blog = blog[0];
 			});
-			BlogApp.blog = blog[0];
 		},
 
 		category: function(url){

@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Parse.js Blog Tutorial Demo - Samantha Zhang @moyicat</title>
+	<title>Build Your Blog from Scratch with Parse.js - Samantha Zhang @moyicat</title>
 
 	<!-- CSS -->
 	<link href="css/bootstrap.min.css" rel="stylesheet">
@@ -37,19 +37,21 @@
 		<div class="container">
 
 			<div class="blog-header">
-				<h1 class="blog-title">The Bootstrap Blog</h1>
-				<p class="lead blog-description">The official example template of creating a blog with Bootstrap.</p>
+				<h1 class="blog-title">Build Your Blog from Scratch with Parse.js</h1>
+				<p class="lead blog-description">
+					Read the tutorial @ Tuts+: [URL]
+				</p>
 			</div>
 
 			<div class="row">
 				<div class="col-sm-8 blog-main">
 					<div class="main-container">
-						<!-- /.container -->
+						<!-- $container -->
 					</div>
 				</div>
 
 				<div class="col-sm-3 col-sm-offset-1 blog-sidebar">
-					<!-- /.blog-sidebar -->
+					<!-- $sidebar -->
 				</div>
 
 			</div>
@@ -57,7 +59,12 @@
 		</div>
 
 		<div class="blog-footer">
-			<p>Blog template built for <a href="http://getbootstrap.com" target="_blank">Bootstrap</a> by <a href="https://twitter.com/mdo">@mdo</a>, modified by <a href="https://twitter.com/moyicat" target="_blank">@moyicat</a></p>
+			<p>
+				Blog demo built for <a href="http://code.tutsplus.com/" target="_blank" rel="nofollow">Tuts+</a> 
+				by <a href="https://twitter.com/moyicat" target="_blank">@moyicat</a>. <br>
+				Blog template built for <a href="http://getbootstrap.com" target="_blank" rel="nofollow">Bootstrap</a> 
+				by <a href="https://twitter.com/mdo" target="_blank" rel="nofollow">@mdo</a>.
+			</p>
 			<p>
 				<a href="#">Back to top</a>
 			</p>
@@ -70,7 +77,7 @@
 		{{#each blog}}
 		<div class="blog-post">
 			<h2 class="blog-post-title"><a href="#/blog/{{url}}">{{title}}</a></h2>
-			<p class="blog-post-meta">{{time}} by <a href="#">{{authorName}}</a></p>
+			<p class="blog-post-meta">{{time}} by {{authorName}}</p>
 			<div>{{{content}}}</div>
 		</div>
 		{{/each}}
@@ -81,38 +88,42 @@
 
 		<div class="blog-post">
 			<h2 class="blog-post-title">{{title}}</h2>
-			<p class="blog-post-meta">{{time}} by <a href="#">{{authorName}}</a></p>
+			<p class="blog-post-meta">{{time}} by {{authorName}}</p>
 			<div>{{{content}}}</div>
 		</div>
 
-		<h2>Leave a Comment</h2>
-		<form class="form-comment" role="form">
-			<div class="form-group">
-				<label for="comment-author-name">Name</label>
-				<input name="authorName" type="text" class="form-control" id="comment-author-name" placeholder="Your name">
-			</div>
-			<div class="form-group">
-				<label for="comment-email">Email address</label>
-				<input name="email" type="email" class="form-control" id="comment-email" placeholder="Your email">
-			</div>
-			
-			<div class="form-group">
-				<label for="comment-content">Comment</label>
-				<textarea name="content" class="form-control" rows="3" id="comment-content"></textarea>
-			</div>
-			<button type="submit" class="btn btn-default">Submit</button>
-		</form>
+		<div class="blog-sec">
+			<h2>Leave a Comment</h2>
+			<form class="form-comment" role="form">
+				<div class="form-group">
+					<label for="comment-author-name">Name</label>
+					<input name="authorName" type="text" class="form-control" id="comment-author-name" placeholder="Your name">
+				</div>
+				<div class="form-group">
+					<label for="comment-email">Email address</label>
+					<input name="email" type="email" class="form-control" id="comment-email" placeholder="Your email">
+				</div>
+				
+				<div class="form-group">
+					<label for="comment-content">Comment</label>
+					<textarea name="content" class="form-control" rows="3" id="comment-content"></textarea>
+				</div>
+				<button type="submit" class="btn btn-default">Submit</button>
+			</form>
+		</div>
 
 		{{#if comment}}
-		<h2>Comments</h2>
-		<ul class="blog-comments list-unstyled">
-		{{#each comment}}
-			<li class="blog-comment">
-				<div><a href="mailto:{{email}}">{{authorName}}</a> said on {{time}}:</div>
-				<div>{{content}}</div>
-			</li>		
-		{{/each}}
-		</ul>
+		<div class="blog-sec">
+			<h2>Comments</h2>
+			<ul class="blog-comments list-unstyled">
+			{{#each comment}}
+				<li class="blog-comment">
+					<div><a href="mailto:{{email}}">{{authorName}}</a> said on {{time}}:</div>
+					<div>{{content}}</div>
+				</li>		
+			{{/each}}
+			</ul>
+		</div>
 		{{/if}}
 
 	</script>
@@ -122,7 +133,12 @@
 		<div class="sidebar-module sidebar-module-inset">
 			<h4>About</h4>
 			<p>
-				This is the tutorial demo.
+				This is a tutorial demo, feel free to play around :)<br>
+				<br>
+				Username: Test <br>
+				Password: test123456<br>
+				<br>
+				- Brought to you by <a href="https://twitter.com/moyicat" target="_blank">@moyicat</a>
 			</p>
 		</div>
 
