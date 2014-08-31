@@ -42,21 +42,18 @@ $(function() {
 				this.setACL(blogACL);
 			}
 
-			var d = new Date(),
-				category = BlogApp.categories.filter( function(category) {
-					return category.id == form.category;
-				})[0];
+			BlogApp.category.id = form.category;
 
 			this.set({
 				'title': form.title,
 				'url': form.title.toLowerCase()
 							.replace(/[^\w ]+/g,'')
 							.replace(/ +/g,'-'),
-				'category': category,
+				'category': BlogApp.category,
 				'content': form.content,
 				'author': this.get('author') || Parse.User.current(),
 				'authorName': this.get('authorName') || Parse.User.current().get('username'),
-				'time': this.get('time') || d.toDateString()
+				'time': this.get('time') || new Date().toDateString()
 			}).save(null, {
 				success: function(blog) {
 					Parse.history.navigate('#/admin', { trigger: true });
@@ -76,15 +73,15 @@ $(function() {
 	});
 
 	BlogApp.Models.Comment = Parse.Object.extend('Comment', {
+		
 		update: function(form) {
-			var d = new Date();
 
 			this.set({
 				'authorName': form.authorName,
 				'email': form.email,
 				'content': form.content,
 				'blog': BlogApp.blog,
-				'time': d.toDateString()
+				'time': new Date().toDateString()
 			}).save(null, {
 				success: function(comment) {
 					window.location.reload();
@@ -92,8 +89,10 @@ $(function() {
 				error: function(comment, error) {
 					console.log(error);
 				}
-			})
+			});
+
 		}
+
 	});
 
 	BlogApp.Collections.Comments = Parse.Collection.extend({
@@ -127,7 +126,7 @@ $(function() {
 			'submit .form-comment': 'submit'
 		},
 
-		submit: function (e) {
+		submit: function(e) {
 			e.preventDefault();
 
 			var data = $(e.target).serializeArray();
@@ -139,17 +138,15 @@ $(function() {
 			});
 		},
 
-		render: function (){ 
+		render: function() { 
 			var self = this,
 				attributes = this.model.toJSON(),
 				query = new Parse.Query(BlogApp.Models.Comment);
 			query.equalTo("blog", this.model);
 			var collection = query.collection();
-			collection.fetch({
-				success: function(comments) {
-					attributes.comment = comments.toJSON();
-					self.$el.html(self.template(attributes));		
-				}
+			collection.fetch().then(function(comments) {
+				attributes.comment = comments.toJSON();
+				self.$el.html(self.template(attributes));		
 			});
 		},
 
@@ -163,32 +160,6 @@ $(function() {
 
 		render: function() {
 			var collection = { category: this.collection.toJSON() };
-			this.$el.html(this.template(collection));
-		}
-
-	});
-
-	BlogApp.Views.Archives = Parse.View.extend({
-
-		className: 'sidebar-module',
-
-		template: Handlebars.compile($('#nav-archives-tpl').html()),
-
-		render: function() {
-			var archMo,
-				archYr,
-				collection = { archive: [] };
-			this.collection.forEach(function(blog){
-				if ( blog.get('month') === archMo && blog.get('year') === archYr ) {
-					return;
-				} else {
-					var json = blog.toJSON();
-					json.monthString = BlogApp.fn.toMonthString(json.month);
-					collection.archive.push(json);
-					archMo = blog.get('month');
-					archYr = blog.get('year');
-				}
-			});
 			this.$el.html(this.template(collection));
 		}
 
@@ -208,11 +179,10 @@ $(function() {
 
 		render: function() {
 			var collection = { category: this.collection.toJSON() };
-			collection.category.forEach(function(c){
-				if ( BlogApp.blog && c.objectId === BlogApp.blog.attributes.category.id ) {
+			collection.category.forEach(function(c) {
+				if ( !BlogApp.blog.attributes.category ) return;
+				if ( c.objectId === BlogApp.blog.attributes.category.id ) {
 					c.selected = true;
-				} else {
-					return;
 				}
 			});
 			this.$el.html(this.template(collection));
@@ -255,7 +225,7 @@ $(function() {
 					Parse.history.navigate('#/admin', { trigger: true });
 				},
 				error: function(user, error) {
-					console.log(error);
+					alert(error.message);
 				}
 			});
 
@@ -274,10 +244,12 @@ $(function() {
 		render: function(){
 			var self = this,
 				attributes = this.model.toJSON();
-			BlogApp.fn.fetchCollection(BlogApp.blogs, function(blogs){
-				var blogsAdminView = new BlogApp.Views.BlogsAdmin({ collection: blogs });
-				blogsAdminView.render();
-				attributes.blogs = blogsAdminView.el.outerHTML;
+			BlogApp.blogs.fetch().then(function(blogs) {
+				attributes.blogs = BlogApp.fn.renderView({
+					View: BlogApp.Views.BlogsAdmin,
+					data: { collection: blogs },
+					notInsert: true
+				});
 				self.$el.html(self.template(attributes));
 			});
 		}
@@ -294,7 +266,6 @@ $(function() {
 
 		submit: function(e) {
 			e.preventDefault();
-
 			var data = $(e.target).serializeArray();
 			this.model = this.model || new BlogApp.Models.Blog();
 			this.model.update({
@@ -317,23 +288,29 @@ $(function() {
 					content: ''
 				}
 			}
-			BlogApp.fn.fetchCollection(BlogApp.categories, function(categories){
-				var categoriesSelect = new BlogApp.Views.CategoriesSelect({ collection: categories });
-				categoriesSelect.render();
-				attributes.categoriesSelect = categoriesSelect.el.outerHTML;
+			BlogApp.categories.fetch().then(function(categories) {
+				attributes.categoriesSelect = BlogApp.fn.renderView({
+					View: BlogApp.Views.CategoriesSelect,
+					data: { collection: categories },
+					notInsert: true
+				});
 				self.$el.html(self.template(attributes));
 				self.$el.find('textarea').wysihtml5();
 			});
-			
 		}
-
 	});
 
 	BlogApp.Router = Parse.Router.extend({
 
 		initialize: function(options){
+			BlogApp.blog = new BlogApp.Models.Blog();
 			BlogApp.blogs = new BlogApp.Collections.Blogs();
+			BlogApp.category = new BlogApp.Models.Category();
 			BlogApp.categories = new BlogApp.Collections.Categories();
+			BlogApp.query = {
+				blog: new Parse.Query(BlogApp.Models.Blog),
+				category: new Parse.Query(BlogApp.Models.Category)
+			};
 		},
 		
 		start: function(){
@@ -355,7 +332,7 @@ $(function() {
 
 		index: function() {
 			BlogApp.fn.setPageType('blog');
-			BlogApp.fn.fetchCollection(BlogApp.blogs, function(blogs) {
+			BlogApp.blogs.fetch().then(function(blogs) {
 				BlogApp.fn.renderView({
 					View: BlogApp.Views.Blogs,
 					data: { collection: blogs }
@@ -365,28 +342,21 @@ $(function() {
 
 		blog: function (url) {
 			BlogApp.fn.setPageType('blog');
-			var query = new Parse.Query(BlogApp.Models.Blog);
-			query
-			.equalTo("url", url)
-			.find()
-			.then(function(blog) {
+			BlogApp.query.blog.equalTo("url", url).find().then(function(blog) {
 				BlogApp.fn.renderView({
 					View: BlogApp.Views.Blog,
 					data: { model: blog[0] }
 				});
 			});
+			BlogApp.blog = blog[0];
 		},
 
 		category: function(url){
 			BlogApp.fn.setPageType('blog');
-			var innerQuery = new Parse.Query(BlogApp.Models.Category),
-				query = new Parse.Query(BlogApp.Models.Blog);
-			innerQuery.equalTo('url', url);
-			query.matchesQuery('category', innerQuery);
-			var blogs = query.collection();
-			blogs
-			.fetch()
-			.then(function(blogs) {
+			BlogApp.query.category.equalTo('url', url);
+			BlogApp.query.blog.matchesQuery('category', BlogApp.query.category);
+			var blogs = BlogApp.query.blog.collection();
+			blogs.fetch().then(function(blogs) {
 				BlogApp.fn.renderView({
 					View: BlogApp.Views.Blogs,
 					data: { collection: blogs }
@@ -408,7 +378,7 @@ $(function() {
 
 		admin: function() {
 			BlogApp.fn.setPageType('admin');
-			var currentUser = BlogApp.fn.checkLogin();
+			var currentUser = Parse.User.current();
 			BlogApp.fn.renderView({
 				View: BlogApp.Views.Welcome,
 				data: { model: currentUser }
@@ -424,55 +394,45 @@ $(function() {
 
 		edit: function (url) {
 			BlogApp.fn.setPageType('admin');
-			var query = new Parse.Query(BlogApp.Models.Blog);
-			query
-			.equalTo("url", url)
-			.find()
-			.then(function(blog) {
+			BlogApp.query.blog.equalTo("url", url).find().then(function(blog) {
 				BlogApp.fn.renderView({
 					View: BlogApp.Views.WriteBlog,
 					data: { model: blog[0] }
 				});
+				BlogApp.blog = blog[0];
 			});
 		},
 
 		del: function (url) {
 			BlogApp.fn.setPageType('admin');
-			var blog = BlogApp.blogs.filter( function(blog) {
-				return blog.get('url') == url;
-			})[0];
-			blog
-			.destroy()
-			.then(function(blog) {
-				Parse.history.navigate('#/admin', { trigger: true });
+			var query = new Parse.Query(BlogApp.Models.Blog);
+			BlogApp.query.blog.equalTo("url", url).find().then(function(blog) {
+				blog[0].destroy()
+				.then(function(blog) {
+					Parse.history.navigate('#/admin', { trigger: true });
+					window.location.reload();
+				});
 			});
 		}
 
 	});
 
-	BlogApp.fn.fetchCollection = function(collection, callback) {
-		if (collection.length) {
-			callback(collection);
+	BlogApp.fn.renderView = function(options) {
+		var View = options.View,
+			data = options.data 			|| null,
+			$container = options.$container || BlogApp.$container,
+			notInsert = options.notInsert,
+			view = new View(data);
+		view.render();
+		if (notInsert) {
+			return view.el.outerHTML;
 		} else {
-			collection
-			.fetch()
-			.then(function(collection) {
-				callback(collection);
-			});
+			$container.html(view.el);
 		}
 	};
 
-	BlogApp.fn.renderView = function(options) {
-		var View = options.View,
-			data = options.data || null,
-			$container = options.$container || BlogApp.$container,
-			view = new View(data);
-		view.render();
-		$container.html(view.el);
-	};
-
 	BlogApp.fn.getSidebar = function() {
-		BlogApp.fn.fetchCollection(BlogApp.categories, function(categories){
+		BlogApp.categories.fetch().then(function(categories){
 			BlogApp.fn.renderView({
 				View: BlogApp.Views.Categories,
 				data: { collection: categories },
@@ -499,7 +459,7 @@ $(function() {
 		if (!currentUser) {
 			Parse.history.navigate('#/login', { trigger: true });
 		} else {
-			return currentUser;
+			return;
 		}
 	};
 

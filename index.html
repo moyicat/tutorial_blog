@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>moyi's Blog</title>
+	<title>Parse.js Blog Tutorial Demo - Samantha Zhang @moyicat</title>
 
 	<!-- Bootstrap -->
 	<link href="css/bootstrap.min.css" rel="stylesheet">
@@ -20,6 +20,8 @@
 	<![endif]-->
 </head>
 <body>
+
+	<!-- Templates -->
 
 	<script id="master-tpl" type="text/x-handlebars-template">
 
@@ -41,23 +43,18 @@
 
 			<div class="row">
 				<div class="col-sm-8 blog-main">
-					<div class="main-container"></div>
-				</div><!-- /.blog-main -->
+					<div class="main-container">
+						<!-- /.container -->
+					</div>
+				</div>
 
 				<div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+					<!-- /.blog-sidebar -->
+				</div>
 
-					<div class="sidebar-module sidebar-module-inset">
-						<h4>About</h4>
-						<p>
-							This is the tutorial demo.
-						</p>
-					</div>
+			</div>
 
-				</div><!-- /.blog-sidebar -->
-
-			</div><!-- /.row -->
-
-		</div><!-- /.container -->
+		</div>
 
 		<div class="blog-footer">
 			<p>Blog template built for <a href="http://getbootstrap.com" target="_blank">Bootstrap</a> by <a href="https://twitter.com/mdo">@mdo</a>, modified by <a href="https://twitter.com/moyicat" target="_blank">@moyicat</a></p>
@@ -67,8 +64,6 @@
 		</div>
 
 	</script>
-
-	<!-- Templates -->
 
 	<script id="blogs-tpl" type="text/x-handlebars-template">
 		{{#each blog}}
@@ -120,22 +115,18 @@
 	</script>
 
 	<script id="nav-categories-tpl" type="text/x-handlebars-template">
+		<div class="sidebar-module sidebar-module-inset">
+			<h4>About</h4>
+			<p>
+				This is the tutorial demo.
+			</p>
+		</div>
+
 		<h4>Categories</h4>
 		<ol class="list-unstyled">
 			{{#each category}}
 			<li>
 				<a href="#/category/{{url}}">{{name}}</a>
-			</li>
-			{{/each}}
-		</ol>
-	</script>
-
-	<script id="nav-archives-tpl" type="text/x-handlebars-template">
-		<h4>Archives</h4>
-		<ol class="list-unstyled">
-			{{#each archive}}
-			<li>
-				<a href="#/archive/{{year}}/{{month}}">{{monthString}} {{year}}</a>
 			</li>
 			{{/each}}
 		</ol>
