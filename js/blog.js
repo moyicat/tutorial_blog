@@ -15,7 +15,7 @@ $(function() {
 		fn: {},
 
 		template: Handlebars.compile($('#master-tpl').html()),
-		
+
 		render: function() {
 			this.$el.html(this.template());
 		},
@@ -368,7 +368,8 @@ $(function() {
 			var query = new Parse.Query(BlogApp.Models.Blog);
 			query
 			.equalTo("url", url)
-			.find(function(blog) {
+			.find()
+			.then(function(blog) {
 				BlogApp.fn.renderView({
 					View: BlogApp.Views.Blog,
 					data: { model: blog[0] }
@@ -383,23 +384,20 @@ $(function() {
 			innerQuery.equalTo('url', url);
 			query.matchesQuery('category', innerQuery);
 			var blogs = query.collection();
-			blogs.fetch({
-				success: function(blogs) {
-					BlogApp.fn.renderView({
-						View: BlogApp.Views.Blogs,
-						data: { collection: blogs }
-					});
-				}, 
-				error: function(blogs, error) {
-					console.log(error);
-				}
-			})
+			blogs
+			.fetch()
+			.then(function(blogs) {
+				BlogApp.fn.renderView({
+					View: BlogApp.Views.Blogs,
+					data: { collection: blogs }
+				});
+			});
 		},
 
 		login: function() {
 			BlogApp.fn.setPageType('login');
 			BlogApp.fn.renderView({
-					View: BlogApp.Views.Login,
+				View: BlogApp.Views.Login
 			});
 		},
 
@@ -429,7 +427,8 @@ $(function() {
 			var query = new Parse.Query(BlogApp.Models.Blog);
 			query
 			.equalTo("url", url)
-			.find(function(blog) {
+			.find()
+			.then(function(blog) {
 				BlogApp.fn.renderView({
 					View: BlogApp.Views.WriteBlog,
 					data: { model: blog[0] }
@@ -442,13 +441,10 @@ $(function() {
 			var blog = BlogApp.blogs.filter( function(blog) {
 				return blog.get('url') == url;
 			})[0];
-			blog.destroy({
-				success: function(blog) {
-					Parse.history.navigate('#/admin', { trigger: true });
-				},
-				error: function(blog, error) {
-					console.log(error);
-				}
+			blog
+			.destroy()
+			.then(function(blog) {
+				Parse.history.navigate('#/admin', { trigger: true });
 			});
 		}
 
@@ -458,15 +454,11 @@ $(function() {
 		if (collection.length) {
 			callback(collection);
 		} else {
-			collection.fetch({
-				success: function (collection) {
-					callback(collection);
-				},
-				error: function(collection, error) {
-					console.log(error);
-					return;
-				}
-			})
+			collection
+			.fetch()
+			.then(function(collection) {
+				callback(collection);
+			});
 		}
 	};
 
