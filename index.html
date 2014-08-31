@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Parse.js Blog Tutorial Demo - Samantha Zhang @moyicat</title>
 
-	<!-- Bootstrap -->
+	<!-- CSS -->
 	<link href="css/bootstrap.min.css" rel="stylesheet">
 	<link href="css/bootstrap-wysihtml5.css" rel="stylesheet">
 	<link href="css/blog.css" rel="stylesheet">
@@ -66,6 +66,7 @@
 	</script>
 
 	<script id="blogs-tpl" type="text/x-handlebars-template">
+
 		{{#each blog}}
 		<div class="blog-post">
 			<h2 class="blog-post-title"><a href="#/blog/{{url}}">{{title}}</a></h2>
@@ -73,9 +74,11 @@
 			<div>{{{content}}}</div>
 		</div>
 		{{/each}}
+
 	</script>
 
 	<script id="blog-tpl" type="text/x-handlebars-template">
+
 		<div class="blog-post">
 			<h2 class="blog-post-title">{{title}}</h2>
 			<p class="blog-post-meta">{{time}} by <a href="#">{{authorName}}</a></p>
@@ -115,6 +118,7 @@
 	</script>
 
 	<script id="nav-categories-tpl" type="text/x-handlebars-template">
+
 		<div class="sidebar-module sidebar-module-inset">
 			<h4>About</h4>
 			<p>
@@ -130,9 +134,11 @@
 			</li>
 			{{/each}}
 		</ol>
+
 	</script>
 
 	<script id="blogs-admin-tpl" type="text/x-handlebars-template">
+
 		<thead>
 			<tr>
 				<th>Title</th>
@@ -154,25 +160,31 @@
 			</tr>
 			{{/each}}
 		</tbody>
+
 	</script>
 
 	<script id="welcome-tpl" type="text/x-handlebars-template">
+
 		<h2>Welcome, {{username}}</h2>
 		{{{blogs}}}
 		<a class="btn btn-lg btn-primary app-link" href="#/add">Add a New Blog</a>
 		<a class="btn btn-lg btn-default app-link" href="#/logout">Logout</a>
+
 	</script>
 
 	<script id="login-tpl" type="text/x-handlebars-template">
+
 		<form class="form-signin" role="form">
 			<h2 class="form-signin-heading">Please sign in</h2>
 			<input type="text" name="username" class="form-control" placeholder="Username" required="" autofocus="">
 			<input type="password" name="password" class="form-control" placeholder="Password" required="">
 			<button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
 		</form>
+
 	</script>
 
 	<script id="write-tpl" type="text/x-handlebars-template">
+
 		<a href="#/admin" class="app-link">&laquo; Back</a>
 
 		<h2>{{form_title}}</h2>
@@ -192,17 +204,19 @@
 			</div>
 			<button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
 		</form>
+
 	</script>
 
 	<script id="select-categories-tpl" type="text/x-handlebars-template">
+
 		{{#each category}}
 		<option value="{{objectId}}" {{#if selected}}selected{{/if}}>{{name}}</option>
 		{{/each}}
+
 	</script>
 
-	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	<!-- Javascript -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-	<!-- Include all compiled plugins (below), or include individual files as needed -->
 	<script src="https://www.parsecdn.com/js/parse-1.2.19.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/handlebars-v1.3.0.js"></script>
@@ -210,9 +224,11 @@
 	<script src="js/bootstrap3-wysihtml5.js"></script>
 	<script src="js/blog.js"></script>
 
+	<!-- Tracking Code, take out for Tuts+ -->
 	<a class="clicky-hide" title="Real Time Analytics" href="http://clicky.com/100766838"><img alt="Real Time Analytics" src="//static.getclicky.com/media/links/badge.gif" border="0" /></a>
 	<script src="//static.getclicky.com/js" type="text/javascript"></script>
 	<script type="text/javascript">try{ clicky.init(100766838); }catch(e){}</script>
 	<noscript><p class="clicky-hide"><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/100766838ns.gif" /></p></noscript>
+
 </body>
 </html>

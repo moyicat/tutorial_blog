@@ -1,11 +1,14 @@
 $(function() {
 
+	// Enable jQuery for Parse
 	Parse.$ = jQuery;
 
+	// Parse API - Replace with Yours!
 	Parse.initialize(
 		'MuLlfET9KdSdwJ70aol03zHmu5bNTGprdu5jZpec', 
 		'NslqpkwkAsRP3gxw5pSlf8gw9PJhKqNW6UbikTK3');
 
+	// Main Blog App
 	var BlogApp = new (Parse.View.extend({
 
 		Models: {},
@@ -31,6 +34,10 @@ $(function() {
 		}
 
 	}))({el: document.body});
+
+	// Models
+
+	BlogApp.Models.Category = Parse.Object.extend('Category');
 
 	BlogApp.Models.Blog = Parse.Object.extend('Blog', {
 
@@ -67,11 +74,6 @@ $(function() {
 
 	});
 
-	BlogApp.Collections.Blogs = Parse.Collection.extend({
-		model: BlogApp.Models.Blog,
-		query: (new Parse.Query(BlogApp.Models.Blog)).descending('createdAt')
-	});
-
 	BlogApp.Models.Comment = Parse.Object.extend('Comment', {
 		
 		update: function(form) {
@@ -95,16 +97,24 @@ $(function() {
 
 	});
 
-	BlogApp.Collections.Comments = Parse.Collection.extend({
-		model: BlogApp.Models.Comment
-	});
-
-	BlogApp.Models.Category = Parse.Object.extend('Category');
+	// Collections
 
 	BlogApp.Collections.Categories = Parse.Collection.extend({
 		model: BlogApp.Models.Category
 	});
 
+	BlogApp.Collections.Blogs = Parse.Collection.extend({
+		model: BlogApp.Models.Blog,
+		query: (new Parse.Query(BlogApp.Models.Blog)).descending('createdAt')
+	});
+
+	BlogApp.Collections.Comments = Parse.Collection.extend({
+		model: BlogApp.Models.Comment
+	});
+
+	// Views
+
+	// List Blog View - the blog list on index and category
 	BlogApp.Views.Blogs = Parse.View.extend({
 
 		className: 'blog-posts',
@@ -118,6 +128,7 @@ $(function() {
 
 	});
 
+	// Single Blog View - one blog and its comments
 	BlogApp.Views.Blog = Parse.View.extend({
 
 		template: Handlebars.compile($('#blog-tpl').html()),
@@ -152,6 +163,7 @@ $(function() {
 
 	});
 
+	// Categories List View - category list in the sidebar
 	BlogApp.Views.Categories = Parse.View.extend({
 
 		className: 'sidebar-module',
@@ -165,6 +177,7 @@ $(function() {
 
 	});
 
+	// Categories Select - category select in add/edit blog view
 	BlogApp.Views.CategoriesSelect = Parse.View.extend({
 
 		tagName: 'select',
@@ -190,6 +203,7 @@ $(function() {
 
 	});
 
+	// Blog Admin View - blog list in the admin page
 	BlogApp.Views.BlogsAdmin = Parse.View.extend({
 
 		tagName: 'table',
@@ -205,6 +219,7 @@ $(function() {
 
 	});
 
+	// Login View
 	BlogApp.Views.Login = Parse.View.extend({
 
 		template: Handlebars.compile($('#login-tpl').html()),
@@ -237,6 +252,7 @@ $(function() {
 
 	});
 
+	// Welcome View - admin page view (it renders blog list within)
 	BlogApp.Views.Welcome = Parse.View.extend({
 
 		template: Handlebars.compile($('#welcome-tpl').html()),
@@ -256,6 +272,7 @@ $(function() {
 
 	});
 
+	// Add / Edit Blog View
 	BlogApp.Views.WriteBlog = Parse.View.extend({
 
 		template: Handlebars.compile($('#write-tpl').html()),
@@ -300,6 +317,7 @@ $(function() {
 		}
 	});
 
+	// Router
 	BlogApp.Router = Parse.Router.extend({
 
 		initialize: function(options){
@@ -417,11 +435,12 @@ $(function() {
 
 	});
 
+	// Render View Function - render data in a View Object
 	BlogApp.fn.renderView = function(options) {
-		var View = options.View,
-			data = options.data 			|| null,
-			$container = options.$container || BlogApp.$container,
-			notInsert = options.notInsert,
+		var View = options.View, // type of View
+			data = options.data || null, // data obj to render in the view
+			$container = options.$container || BlogApp.$container, // container to put the view
+			notInsert = options.notInsert, // put the el in the container or return el as HTML
 			view = new View(data);
 		view.render();
 		if (notInsert) {
@@ -431,6 +450,7 @@ $(function() {
 		}
 	};
 
+	// Render sidebar on everypage
 	BlogApp.fn.getSidebar = function() {
 		BlogApp.categories.fetch().then(function(categories){
 			BlogApp.fn.renderView({
@@ -441,6 +461,7 @@ $(function() {
 		});
 	};
 
+	// Set page type - control the .active class in nav; control if check login
 	BlogApp.fn.setPageType = function(type) {
 		if (type === "blog") {
 			BlogApp.$nav.eq(0).addClass('active')
@@ -454,6 +475,7 @@ $(function() {
 		}
 	};
 
+	// Check login - for all the admin pages
 	BlogApp.fn.checkLogin = function() {
 		var currentUser = Parse.User.current();
 		if (!currentUser) {
@@ -463,6 +485,7 @@ $(function() {
 		}
 	};
 
+	// Start the app
 	BlogApp.start();
 
 });
