@@ -339,7 +339,7 @@ $(function() {
 
 		index: function() {
 			BlogApp.fn.setPageType('blog');
-			BlogApp.query.blog.find().then(function(blogs) {
+			BlogApp.query.blogs.find().then(function(blogs) {
 				BlogApp.fn.renderView({
 					View: BlogApp.Views.Blogs,
 					data: { collection: blogs }
@@ -470,7 +470,7 @@ $(function() {
 	BlogApp.fn.checkLogin = function() {
 		var currentUser = Parse.User.current();
 		if (!currentUser) {
-			Backbone.history.navigate('#/login', { trigger: true });
+			Backbone.history.navigate('#/login', { trigger: false });
 		} else {
 			return;
 		}
