@@ -76,9 +76,9 @@
 
 		{{#each blog}}
 		<div class="blog-post">
-			<h2 class="blog-post-title"><a href="#/blog/{{url}}">{{title}}</a></h2>
-			<p class="blog-post-meta">{{time}} by {{authorName}}</p>
-			<div>{{{content}}}</div>
+			<h2 class="blog-post-title"><a href="#/blog/{{attributes.url}}">{{attributes.title}}</a></h2>
+			<p class="blog-post-meta">{{attributes.time}} by {{attributes.authorName}}</p>
+			<div>{{{attributes.content}}}</div>
 		</div>
 		{{/each}}
 
@@ -87,9 +87,9 @@
 	<script id="blog-tpl" type="text/x-handlebars-template">
 
 		<div class="blog-post">
-			<h2 class="blog-post-title">{{title}}</h2>
-			<p class="blog-post-meta">{{time}} by {{authorName}}</p>
-			<div>{{{content}}}</div>
+			<h2 class="blog-post-title">{{blog.attributes.title}}</h2>
+			<p class="blog-post-meta">{{blog.attributes.time}} by {{blog.attributes.authorName}}</p>
+			<div>{{{blog.attributes.content}}}</div>
 		</div>
 
 		<div class="blog-sec">
@@ -118,8 +118,8 @@
 			<ul class="blog-comments list-unstyled">
 			{{#each comment}}
 				<li class="blog-comment">
-					<div><a href="mailto:{{email}}">{{authorName}}</a> said on {{time}}:</div>
-					<div>{{content}}</div>
+					<div><a href="mailto:{{attributes.email}}">{{attributes.authorName}}</a> said on {{attributes.time}}:</div>
+					<div>{{attributes.content}}</div>
 				</li>		
 			{{/each}}
 			</ul>
@@ -146,7 +146,7 @@
 		<ol class="list-unstyled">
 			{{#each category}}
 			<li>
-				<a href="#/category/{{url}}">{{name}}</a>
+				<a href="#/category/{{attributes.url}}">{{attributes.name}}</a>
 			</li>
 			{{/each}}
 		</ol>
@@ -166,12 +166,12 @@
 		<tbody>
 			{{#each blog}}
 			<tr>
-				<td><a class="app-link" href="#/edit/{{url}}">{{title}}</a></td>
-				<td>{{authorName}}</td>
-				<td>{{time}}</td>
+				<td><a class="app-link" href="#/edit/{{attributes.url}}">{{attributes.title}}</a></td>
+				<td>{{attributes.authorName}}</td>
+				<td>{{attributes.time}}</td>
 				<td>
-					<a class="app-link" href="#/edit/{{url}}">Edit</a> | 
-					<a class="app-link" href="#/del/{{url}}">Delete</a>
+					<a class="app-link" href="#/edit/{{attributes.url}}">Edit</a> | 
+					<a class="app-link" href="#/del/{{attributes.url}}">Delete</a>
 				</td>
 			</tr>
 			{{/each}}
@@ -208,7 +208,7 @@
 		<form class="form-write" role="form">
 			<div class="form-group">
 				<label for="title">Title</label>
-				<input name="title" type="text" class="form-control" id="title" value="{{title}}"></input>
+				<input name="title" type="text" class="form-control" id="title" value="{{attributes.title}}"></input>
 			</div>
 			<div class="form-group">
 				<label for="category">Category</label>
@@ -216,7 +216,7 @@
 			</div>
 			<div class="form-group">
 				<label for="content">Content</label>
-				<textarea name="content" class="form-control" rows="20">{{content}}</textarea>
+				<textarea name="content" class="form-control" rows="20">{{attributes.content}}</textarea>
 			</div>
 			<button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
 		</form>
@@ -226,14 +226,16 @@
 	<script id="select-categories-tpl" type="text/x-handlebars-template">
 
 		{{#each category}}
-		<option value="{{objectId}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+		<option value="{{id}}" {{#if selected}}selected{{/if}}>{{attributes.name}}</option>
 		{{/each}}
 
 	</script>
 
 	<!-- Javascript -->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-	<script src="https://www.parsecdn.com/js/parse-1.2.19.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="//cdn.jsdelivr.net/lodash/4.17.3/lodash.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.3.3/backbone-min.js"></script>
+	<script src="//npmcdn.com/parse/dist/parse.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/handlebars-v1.3.0.js"></script>
 	<script src="js/wysihtml5-0.3.0.min.js"></script>

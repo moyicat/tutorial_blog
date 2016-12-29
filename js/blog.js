@@ -4,15 +4,13 @@ $(function() {
 	Parse.$ = jQuery;
 
 	// Parse API - Replace with Yours!
-	Parse.initialize(
-		'MuLlfET9KdSdwJ70aol03zHmu5bNTGprdu5jZpec', 
-		'NslqpkwkAsRP3gxw5pSlf8gw9PJhKqNW6UbikTK3');
+	Parse.initialize('moyicat-parse-blog-demo');
+	Parse.serverURL = 'https://moyicat-parse-blog-demo.herokuapp.com/parse';
 
 	// Main Blog App
-	var BlogApp = new (Parse.View.extend({
+	var BlogApp = new (Backbone.View.extend({
 
 		Models: {},
-		Collections: {},
 		Views: {},
 		nodes: {},
 		fn: {},
@@ -63,7 +61,7 @@ $(function() {
 				'time': this.get('time') || new Date().toDateString()
 			}).save(null, {
 				success: function(blog) {
-					Parse.history.navigate('#/admin', { trigger: true });
+					Backbone.history.navigate('#/admin', { trigger: true });
 					window.location.reload();
 				},
 				error: function(blog, error) {
@@ -97,39 +95,24 @@ $(function() {
 
 	});
 
-	// Collections
-
-	BlogApp.Collections.Categories = Parse.Collection.extend({
-		model: BlogApp.Models.Category
-	});
-
-	BlogApp.Collections.Blogs = Parse.Collection.extend({
-		model: BlogApp.Models.Blog,
-		query: (new Parse.Query(BlogApp.Models.Blog)).descending('createdAt')
-	});
-
-	BlogApp.Collections.Comments = Parse.Collection.extend({
-		model: BlogApp.Models.Comment
-	});
-
 	// Views
 
 	// List Blog View - the blog list on index and category
-	BlogApp.Views.Blogs = Parse.View.extend({
+	BlogApp.Views.Blogs = Backbone.View.extend({
 
 		className: 'blog-posts',
 
 		template: Handlebars.compile($('#blogs-tpl').html()),
 		
 		render: function(){ 
-			var collection = { blog: this.collection.toJSON() };
+			var collection = { blog: this.collection };
 			this.$el.html(this.template(collection));
 		},
 
 	});
 
 	// Single Blog View - one blog and its comments
-	BlogApp.Views.Blog = Parse.View.extend({
+	BlogApp.Views.Blog = Backbone.View.extend({
 
 		template: Handlebars.compile($('#blog-tpl').html()),
 
@@ -151,34 +134,33 @@ $(function() {
 
 		render: function() { 
 			var self = this,
-				attributes = this.model.toJSON(),
 				query = new Parse.Query(BlogApp.Models.Comment);
-			query.equalTo("blog", this.model);
-			var collection = query.collection();
-			collection.fetch().then(function(comments) {
-				attributes.comment = comments.toJSON();
-				self.$el.html(self.template(attributes));		
+			query.equalTo("blog", this.model).find().then(function(comments) {
+				self.$el.html(self.template({
+					blog: self.model,
+					comment: comments
+				}));		
 			});
 		},
 
 	});
 
 	// Categories List View - category list in the sidebar
-	BlogApp.Views.Categories = Parse.View.extend({
+	BlogApp.Views.Categories = Backbone.View.extend({
 
 		className: 'sidebar-module',
 
 		template: Handlebars.compile($('#nav-categories-tpl').html()),
 
 		render: function() {
-			var collection = { category: this.collection.toJSON() };
+			var collection = { category: this.collection };
 			this.$el.html(this.template(collection));
 		}
 
 	});
 
 	// Categories Select - category select in add/edit blog view
-	BlogApp.Views.CategoriesSelect = Parse.View.extend({
+	BlogApp.Views.CategoriesSelect = Backbone.View.extend({
 
 		tagName: 'select',
 
@@ -191,10 +173,10 @@ $(function() {
 		template: Handlebars.compile($('#select-categories-tpl').html()),
 
 		render: function() {
-			var collection = { category: this.collection.toJSON() };
+			var collection = { category: this.collection };
 			collection.category.forEach(function(c) {
 				if ( !BlogApp.blog.attributes.category ) return;
-				if ( c.objectId === BlogApp.blog.attributes.category.id ) {
+				if ( c.id === BlogApp.blog.attributes.category.id ) {
 					c.selected = true;
 				}
 			});
@@ -204,7 +186,7 @@ $(function() {
 	});
 
 	// Blog Admin View - blog list in the admin page
-	BlogApp.Views.BlogsAdmin = Parse.View.extend({
+	BlogApp.Views.BlogsAdmin = Backbone.View.extend({
 
 		tagName: 'table',
 
@@ -213,14 +195,14 @@ $(function() {
 		template: Handlebars.compile($('#blogs-admin-tpl').html()),
 
 		render: function() {
-			var collection = { blog: this.collection.toJSON() };
+			var collection = { blog: this.collection };
 			this.$el.html(this.template(collection));
 		}
 
 	});
 
 	// Login View
-	BlogApp.Views.Login = Parse.View.extend({
+	BlogApp.Views.Login = Backbone.View.extend({
 
 		template: Handlebars.compile($('#login-tpl').html()),
 
@@ -239,7 +221,7 @@ $(function() {
 
 			Parse.User.logIn(username, password, {
 				success: function(user) {
-					Parse.history.navigate('#/admin', { trigger: true });
+					Backbone.history.navigate('#/admin', { trigger: true });
 				},
 				error: function(user, error) {
 					alert(error.message);
@@ -249,13 +231,13 @@ $(function() {
 		},
 
 		render: function(){
-			this.$el.html(this.template());		
+			this.$el.html(this.template());
 		}
 
 	});
 
 	// Welcome View - admin page view (it renders blog list within)
-	BlogApp.Views.Welcome = Parse.View.extend({
+	BlogApp.Views.Welcome = Backbone.View.extend({
 
 		template: Handlebars.compile($('#welcome-tpl').html()),
 
@@ -263,8 +245,8 @@ $(function() {
 
 		render: function(){
 			var self = this,
-				attributes = this.model.toJSON();
-			BlogApp.blogs.fetch().then(function(blogs) {
+				attributes = this.model;
+			BlogApp.query.blogs.find().then(function(blogs) {
 				attributes.blogs = BlogApp.fn.renderView({
 					View: BlogApp.Views.BlogsAdmin,
 					data: { collection: blogs },
@@ -277,7 +259,7 @@ $(function() {
 	});
 
 	// Add / Edit Blog View
-	BlogApp.Views.WriteBlog = Parse.View.extend({
+	BlogApp.Views.WriteBlog = Backbone.View.extend({
 
 		template: Handlebars.compile($('#write-tpl').html()),
 
@@ -302,7 +284,7 @@ $(function() {
 			var self = this,
 				attributes;
 			if (this.model) {
-				attributes = this.model.toJSON();
+				attributes = this.model;
 				attributes.form_title = 'Edit Blog';	
 			} else {
 				attributes = {
@@ -311,7 +293,7 @@ $(function() {
 					content: ''
 				}
 			}
-			BlogApp.categories.fetch().then(function(categories) {
+			BlogApp.query.categories.find().then(function(categories) {
 				attributes.categoriesSelect = BlogApp.fn.renderView({
 					View: BlogApp.Views.CategoriesSelect,
 					data: { collection: categories },
@@ -324,21 +306,22 @@ $(function() {
 	});
 
 	// Router
-	BlogApp.Router = Parse.Router.extend({
+	BlogApp.Router = Backbone.Router.extend({
 
 		initialize: function(options){
 			BlogApp.blog = new BlogApp.Models.Blog();
-			BlogApp.blogs = new BlogApp.Collections.Blogs();
 			BlogApp.category = new BlogApp.Models.Category();
-			BlogApp.categories = new BlogApp.Collections.Categories();
 			BlogApp.query = {
 				blog: new Parse.Query(BlogApp.Models.Blog),
-				category: new Parse.Query(BlogApp.Models.Category)
+				blogs: new Parse.Query(BlogApp.Models.Blog).descending('createdAt'),
+				category: new Parse.Query(BlogApp.Models.Category),
+				categories: new Parse.Query(BlogApp.Models.Category)
 			};
 		},
 		
 		start: function(){
-			Parse.history.start({root: '/tutorial_blog/'});
+			Backbone.history.start({root: '/tutorial_blog/'});
+			// Backbone.history.start({root: '/'});
 		},
 
 		routes: {
@@ -356,7 +339,7 @@ $(function() {
 
 		index: function() {
 			BlogApp.fn.setPageType('blog');
-			BlogApp.blogs.fetch().then(function(blogs) {
+			BlogApp.query.blog.find().then(function(blogs) {
 				BlogApp.fn.renderView({
 					View: BlogApp.Views.Blogs,
 					data: { collection: blogs }
@@ -375,15 +358,17 @@ $(function() {
 			});
 		},
 
-		category: function(url){
+		category: function(url) {
 			BlogApp.fn.setPageType('blog');
+			var query = new Parse.Query(BlogApp.Models.Blog);
 			BlogApp.query.category.equalTo('url', url);
-			BlogApp.query.blog.matchesQuery('category', BlogApp.query.category);
-			var blogs = BlogApp.query.blog.collection();
-			blogs.fetch().then(function(blogs) {
-				BlogApp.fn.renderView({
-					View: BlogApp.Views.Blogs,
-					data: { collection: blogs }
+			query.matchesQuery('category', BlogApp.query.category)
+				.descending('createdAt')
+				.find()
+				.then(function(blogs) {
+					BlogApp.fn.renderView({
+						View: BlogApp.Views.Blogs,
+						data: { collection: blogs }
 				});
 			});
 		},
@@ -397,7 +382,7 @@ $(function() {
 
 		logout: function () {
 			Parse.User.logOut();
-			Parse.history.navigate('#/login', { trigger: true });
+			Backbone.history.navigate('#/login', { trigger: true });
 		},
 
 		admin: function() {
@@ -433,7 +418,7 @@ $(function() {
 			BlogApp.query.blog.equalTo("url", url).find().then(function(blog) {
 				blog[0].destroy()
 				.then(function(blog) {
-					Parse.history.navigate('#/admin', { trigger: true });
+					Backbone.history.navigate('#/admin', { trigger: true });
 					window.location.reload();
 				});
 			});
@@ -458,7 +443,7 @@ $(function() {
 
 	// Render sidebar on everypage
 	BlogApp.fn.getSidebar = function() {
-		BlogApp.categories.fetch().then(function(categories){
+		BlogApp.query.categories.find().then(function(categories){
 			BlogApp.fn.renderView({
 				View: BlogApp.Views.Categories,
 				data: { collection: categories },
@@ -485,7 +470,7 @@ $(function() {
 	BlogApp.fn.checkLogin = function() {
 		var currentUser = Parse.User.current();
 		if (!currentUser) {
-			Parse.history.navigate('#/login', { trigger: true });
+			Backbone.history.navigate('#/login', { trigger: true });
 		} else {
 			return;
 		}
