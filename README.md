@@ -1,0 +1,1 @@
+This is a demo site for my tutorial on Tuts+: [Build Your Blog From Scratch With Parse.js](https://code.tutsplus.com/series/building-your-blog-with-parsejs--cms-651)
